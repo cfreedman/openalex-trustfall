@@ -1,0 +1,21 @@
+InputQuery (
+  query: r#"
+{
+  HackerNewsTop(max: 200) {
+    ... on HackerNewsStory {
+      byUser {
+        karma @filter(op: ">=", value: ["$min_karma"]) @output
+      }
+      comment: commentsCount @filter(op: ">=", value: ["$min_comments"]) @output
+
+      title: title @output,
+      user: byUsername @output
+      score: score @output,
+    }
+  }
+}"#,
+  args: {
+    "min_comments": Uint64(150),
+    "min_karma": Uint64(20),
+  },
+)

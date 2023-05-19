@@ -1,0 +1,41 @@
+schema {
+  query: RootSchemaQuery
+}
+directive @filter(op: String!, value: [String!]) on FIELD | INLINE_FRAGMENT
+directive @tag(name: String) on FIELD
+directive @output(name: String) on FIELD
+directive @optional on FIELD
+directive @recurse(depth: Int!) on FIELD
+directive @fold on FIELD
+directive @transform(op: String!) on FIELD
+
+
+type RootSchemaQuery {
+  GoogleScholarSearch(search: String!): [GoogleScholarArticle!]
+  GoogleScholarAuthor(name: String!): GoogleScholarAuthor
+}
+
+interface GoogleScholarArticle {
+
+  title: String!
+  description: String!
+  authors: [GoogleScholarAuthor!]
+  date: Int!
+  journal: String!
+  link: String!
+  numberCites: Int!
+
+  # edges
+  citedBy: [GoogleScholarArticle!]
+  relatedArticles: [GoogleScholarArticle!]
+  otherVersions: [GoogleScholarArticle!]
+
+}
+
+interface GoogleScholarAuthor {
+  name: String!
+  articles: [GoogleScholarArticles!]
+  fields: [String!]
+  title: String!
+  affiliation: String!
+}

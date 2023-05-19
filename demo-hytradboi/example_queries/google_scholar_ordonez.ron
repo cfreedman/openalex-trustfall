@@ -1,0 +1,21 @@
+InputQuery {
+  query: r#"
+{
+  GoogleScholarAuthor(name: "Guillermo Ordonez") {
+    articles {
+      ... on GoogleScholarArticle {
+        Title: title @output,
+        Journal: journal @output,
+        numberCites @filter(op: ">=", value: ["$min_cites"]) @output,
+        date @filter(op: ">=", value: ["$start_date"]) @output
+      }
+    }
+    Fields: fields @output,
+    Affiliation: affiliation @output,
+  }
+}"#,
+  args: {
+    "min_cites": Uint64(80),
+    "start_date": Uint64(2017),
+  },
+}

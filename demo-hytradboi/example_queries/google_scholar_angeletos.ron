@@ -1,0 +1,14 @@
+InputQuery {
+  query: r#"
+{
+  GoogleScholarSearch(search: "Macroeconomic expectations") {
+    ... on GoogleScholarAricle {
+      date @filter(op: ">=", value: ["$start_year"]) @output
+
+    }
+  }
+}"#,
+  args: {
+    "start_year": Uint64(2000)
+  }
+}
