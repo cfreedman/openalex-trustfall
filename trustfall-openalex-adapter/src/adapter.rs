@@ -9,24 +9,37 @@ use trustfall_core::{
   },
   ir::{EdgeParameters, FieldValue},
 };
+use vertex::{
+  Vertex, Work, Author, Concept, Source, Institution, Publisher, Funder
+};
 
 lazy_static! {
   static ref OA_Client: Client = reqwest::Client::new()
 }
 
-pub enum Vertex {
-  OpenAlexWork(Rc<Value>),
-  OpenAlexAuthor(Rc<Value>),
-  OpenAlexConcept(Rc<Value>),
-  OpenAlexSource(Rc<Value>),
-  OpenAlexInstitution(Rc<Value>),
-  OpenAlexPublisher(Rc<Value>),
-  OpenAlexFunder(Rc<Value>)
-}
 
 fn get_item_property(item_vertex: &Vertex, field_name: &str) -> FieldValue {
   
   
+}
+
+fn get_funder_property(vertex: &Vertex, field_name: &str) -> FieldValue {
+  match field_name {
+    "country_code" => vertex[country_code].into(),
+    _ => unreachable!("Funder property {field_name}")
+  }
+}
+
+fn property_mapper<'a>(
+  ctx: DataContext<Vertex<'a>>,
+  field_name: &str,
+  property_getter: fn(&Vertex<'a>, &str) -> FieldValue,
+) -> (DataContext<Vertex<'a>>, FieldValue) {
+  let value = match ctx.active_vertex() {
+      Some(vertex) => property_getter(vertex, field_name),
+      None => FieldValue::Null,
+  };
+  (ctx, value)
 }
 
 pub struct AlexAdapter;
@@ -79,48 +92,40 @@ impl Adapter<'static> for AlexAdapter {
     property_name: &Arc<str>,
     _resolve_info: &ResolveInfo,
   ) -> ContextOutcomeIterator<'static, Self::Vertex, FieldValue> {
-    match (type_name.as_ref(), property_name.as_ref()) {
-      (_, "___typename") => Box::new(contexts.map()),
-      // Shared properties
-      (
-        "OpenAlexWork" | "OpenAlexAuthor" | "OpenAlexSource" | "OpenAlexInstitution" | "OpenAlexConcept" | "OpenAlexPublisher" | "OpenAlexFunder",
-        "id" | "ids" | "display_name" | "cited_by_count" | "counts_by_year" | "created_date" | "updated_date",
-      ) => impl_item_property!(contexts, id),
-      // Works properties
-      (
-        "OpenAlexWork",
-        "abstract" | "apc_payment" | "biblio" | "open_acess" | "publication_date" | "publication_year" | "title" | "type" | "is_oa" | "license" | "url" | "version"
-      ) => imply_item_property!(context, id),
-      // Author properties
-      (
-        "OpenAlexAuthor",
-        "display_name_alternatives" | "summary_stats" | "works_count"
-      ) => impl_item_property!(contexts, id),
-      // Source properties
-      (
-        "OpenAlexSource",
-        "apc_prices" | "homepage_url" | "is_oa" | "issn" | "issn_l" | "societies" | "summary_stats" | "type" | "works_count"
-      ) => impl_item_property!(contexts, id),
-      // Institution properties
-      (
-        "OpenAlexInstitution",
-        "country_code" | "display_name_alternatives" | "geo" | "homepage_url" | "ror" | "summary_stats" | "type" | "works_count"
-      ) => impl_item_property!(contexts, id),
-      // Concept properties
-      (
-        "OpenAlexConcept",
-        "description" | "level" | "summary_stats" | "wikidata" | "works_count"
-      ) => impl_item_property!(contexts, id),
-      // Publisher properties
-      (
-        "OpenAlexPublisher",
-        "alternative_titles" | "country_codes" | "hierarchy_level" | "summary_stats" | "works_count"
-      ) => impl_item_property!(contexts, id),
-      // Funder properties
-      (
-        "OpenAlexFunder",
-        "alternative_titles" | "country_code" | "description" | "grants_count" | "homepage_url" | "summary_stats" | "works_count"
-      ) => impl_item_property!(contexts, id)
+    if property_name.as_ref() == "__typename" {
+      Box::new(contexts.map(|ctx: DataContext<Vertex>| match ctx.active_vertex() {
+        Some(vertex) => {
+          let value = vertex.typename().into();
+          (ctx, value)
+        }
+        None => (ctx, FieldValue::Null)
+      }))
+    } else {
+      let property_name = property_name.clone();
+      match type_name.as_ref() {
+        "Work" => Box::new(contexts.map(move |ctx: DataContext<Vertex>| {
+          property_mapper(ctx, property_name.as_ref(), get_work_property)
+        })),
+        "Author" => Box::new(contexts.map(move |ctx: DataContext<Vertex>| {
+          property_mapper(ctx, property_name.as_ref(), get_author_property)
+        })),
+        "Source" => Box::new(contexts.map(move |ctx: DataContext<Vertex>| {
+          property_mapper(ctx, property_name.as_ref(), get_source_property)
+        })),
+        "Concept" => Box::new(contexts.map(move |ctx: DataContext<Vertex>| {
+          property_mapper(ctx, property_name.as_ref(), get_concept_property)
+        })),
+        "Institution" => Box::new(contexts.map(move |ctx: DataContext<Vertex>| {
+          property_mapper(ctx, property_name.as_ref(), get_institution_property)
+        })),
+        "Publisher" => Box::new(contexts.map(move |ctx: DataContext<Vertex>| {
+          property_mapper(ctx, property_name.as_ref(), get_publisher_property)
+        })),
+        "Funder" => Box::new(contexts.map(move |ctx: DataContext<Vertex>| {
+          property_mapper(ctx, property_name.as_ref(), get_funder_property)
+        })),
+        _ => unreachable!("resolve_property {type_name} {property_name}"),
+      }
     }
   }
 
@@ -132,9 +137,68 @@ impl Adapter<'static> for AlexAdapter {
     _parameters: &EdgeParameters,
     _resolve_info: &ResolveEdgeInfo,
   ) -> ContextOutcomeIterator<'static, Self::Vertex, VertexIterator<'static, Self::Vertex>> {
-    match (type_name.as_ref(), edge_name.as_ref()) {
-      // Works edges
-      ("OpenAlexWork", )
+    match type_name.as_ref() {
+      "Work" => match edge_name.as_ref() {
+        "Authors" => {}
+        "Cited_by" => {}
+        "Concepts" => {}
+        "Funders" => {}
+        "Locations" => {}
+        "References" => {}
+        "Related" => {}
+        _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
+
+      }
+      "Author" => match edge_name.as_ref() {
+        "Institution" => {}
+        "Works" => {}
+        _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
+      }
+      "Source" => match edge_name.as_ref() {
+        "Host" => {}
+        "Lineage" => {}
+        "Works" => {}
+        _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
+      }
+      "Concept" => match edge_name.as_ref() {
+        "Ancestors" => {}
+        "Related" => {}
+        "Works" => {}
+        _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
+      }
+      "Institution" => match edge_name.as_ref() {
+        "Associated" => {}
+        "Repositories" => {}
+        "Roles" => {}
+        "Works" => {}
+        _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
+      }
+      "Publisher" => match edge_name.as_ref() {
+        "Lineage" => {}
+        "Roles" => {}
+        "Sources" => {}
+        _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
+      }
+      "Funder" => Box::new(contexts.map(|ctx: DataContext<Vertex>| {
+        let vertex = ctx.active_vertex();
+        let neighbors = match vertex {
+          None => Box::new(std::iter::empty()),
+          Some(vertex) => {
+            let funder = vertex.as_funder.expect("vertex was not a funder");
+            let roles = funder.roles.clone();
+
+            let neighbors_iter = roles.into_iter().filter_map(move |role| {
+              match OA_Client.get(role.id) {
+                Ok(None) => None,
+                Ok(Some()) => {}
+              }
+            });
+            Box::new(neighbors_iter)
+          }
+        };
+
+        (ctx, neighbors)
+      }))
     }
   }
 
@@ -147,6 +211,11 @@ impl Adapter<'static> for AlexAdapter {
   ) -> ContextOutcomeIterator<'static, Self::Vertex, bool> {
     let type_name = type_name.clone();
     let coerce_to_type = coerce_to_type.clone();
+    match type_name.as_ref() {
+      "Institution" => 
+      "Publisher" =>
+      "Funder" =>
+    }
     let iterator = contexts.map(move |ctx| {
         let vertex = match ctx.active_vertex() {
             Some(t) => t,
