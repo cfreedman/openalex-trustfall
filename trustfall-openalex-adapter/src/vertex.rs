@@ -1,267 +1,357 @@
-pub enum Vertex {
-    OpenAlexWork,
-    OpenAlexAuthor,
-    OpenAlexConcept,
-    OpenAlexSource,
-    OpenAlexInstitution,
-    OpenAlexPublisher,
-    OpenAlexFunder
+#[derive(Clone, Debug)]
+pub enum Vertex<'a> {
+    Work(Work<'a>),
+    Author(Author<'a>),
+    Concept(Concept<'a>),
+    Source(Source<'a>),
+    Institution(Institution<'a>),
+    Publisher(Publisher<'a>),
+    Funder(Funder<'a>)
+}
+
+impl<'a> Vertex<'a> {
+
+    pub fn typename(&self) -> &'a str {
+        match self {
+            Vertex::Work(..) => "Work",
+            Vertex::Author(..) => "Author",
+            Vertex::Concept(..) => "Concept",
+            Vertex::Source(..) => "Source",
+            Vertex::Institution(..) => "Institution",
+            Vertex::Publisher(..) => "Publisher",
+            Vertex::Funder(..) => "Funder",
+        }
+    }
+
+    pub fn as_work(&self) -> Option<&Work<'a>>{
+        match self {
+            Vertex::Work(work) => Some(work),
+            _ => None,
+        }
+    }
+
+    pub fn as_author(&self) -> Option<&Author<'a>>{
+        match self {
+            Vertex::Author(author) => Some(author),
+            _ => None,
+        }
+    }
+
+    pub fn as_concept(&self) -> Option<&Concept<'a>>{
+        match self {
+            Vertex::Concept(concept) => Some(concept),
+            _ => None,
+        }
+    }
+
+    pub fn as_source(&self) -> Option<&Source<'a>>{
+        match self {
+            Vertex::Source(source) => Some(source),
+            _ => None,
+        }
+    }
+
+    pub fn as_institution(&self) -> Option<&Institution<'a>>{
+        match self {
+            Vertex::Institution(institution) => Some(institution),
+            _ => None,
+        }
+    }
+
+    pub fn as_publisher(&self) -> Option<&Publisher<'a>>{
+        match self {
+            Vertex::Publisher(publisher) => Some(publisher),
+            _ => None,
+        }
+    }
+
+    pub fn as_funder(&self) -> Option<&Funder<'a>>{
+        match self {
+            Vertex::Funder(funder) => Some(funder),
+            _ => None,
+        }
+    }
 }
 // Basic object with properties shared by all OpenAlex entities
-struct OpenAlexObject {
-    cited_by_count: usize,
-    counts_by_year: &[YearCount],
-    created_data: String,
-    display_name: String,
-    id: String,
-    ids: &[String],
-    updated_data: String,
+#[derive(Clone, Debug)]
+pub struct OpenAlexObject<'a>{
+    pub cited_by_count: u32,
+    pub counts_by_year: &'a [YearCount],
+    pub created_data: String,
+    pub display_name: String,
+    pub id: String,
+    pub ids: &'a [String],
+    pub updated_data: String,
 }
 // OpenAlexWork structs
-struct Work {
-    object: OpenAlexObject,
-    abstract: String,
-    authorships: &[Authorships],
-    apc_payment: Payment,
-    best_oa_location: Location,
-    biblio: Biblio,
-    cited_by_api_url: String,
-    concepts: &[DehydratedConcept],
-    corresponding_author_ids: &[String],
-    corresponding_institution_ids: &[String],
-    doi: String,
-    grants: &[Grant],
-    is_paratext: bool,
-    is_retracted: bool,
-    language: String,
-    locations: &[Location],
-    mesh: &[Mesh],
-    ngrams_url: String,
-    open_access: OpenAccess,
-    primary_location: Location,
-    publication_date: String,
-    publication_year: usize,
-    referenced_works: &[String],
-    related_works: &[String],
-    title: String,
-    ttype: String,
-    is_oa: bool,
-    license: String,
-    url: String,
-    version: String
+#[derive(Clone, Debug)]
+pub struct Work<'a>{
+    pub object: OpenAlexObject<'a>,
+    pub abstract_text: String,
+    pub authorships: &'a [Authorship<'a>],
+    pub apc_payment: Payment,
+    pub best_oa_location: Location<'a>,
+    pub biblio: Biblio,
+    pub cited_by_api_url: String,
+    pub concepts: &'a [DehydratedConcept],
+    pub corresponding_author_ids: &'a [String],
+    pub corresponding_institution_ids: &'a [String],
+    pub doi: String,
+    pub grants: &'a [Grant],
+    pub is_paratext: bool,
+    pub is_retracted: bool,
+    pub language: String,
+    pub locations: &'a [Location<'a>],
+    pub mesh: &'a [Mesh],
+    pub ngrams_url: String,
+    pub open_access: OpenAccess,
+    pub primary_location: Location<'a>,
+    pub publication_date: String,
+    pub publication_year: u16,
+    pub referenced_works: &'a [String],
+    pub related_works: &'a [String],
+    pub title: String,
+    pub ttype: String,
+    pub is_oa: bool,
+    pub license: String,
+    pub url: String,
+    pub version: String
 }
 
-struct Authorship {
-    author_position: String,
-    author: DehydratedAuthor,
-    institutions: &[DehydratedInstitution]
+#[derive(Clone, Debug)]
+pub struct Authorship<'a>{
+    pub author_position: String,
+    pub author: DehydratedAuthor,
+    pub institutions: &'a [DehydratedInstitution]
 }
 
-struct Payment {
-    price: usize,
-    currency: String,
-    provenance: String,
-    price_usd: usize,
+#[derive(Clone, Debug)]
+pub struct Payment {
+    pub price: u32,
+    pub currency: String,
+    pub provenance: String,
+    pub price_usd: u32,
 }
 
-struct Biblio {
-    volume: String,
-    issue: String,
-    first_page: String,
-    last_page: String
+#[derive(Clone, Debug)]
+pub struct Biblio {
+    pub volume: String,
+    pub issue: String,
+    pub first_page: String,
+    pub last_page: String
 }
 
-struct YearCount {
-    year: usize,
-    cited_by_count: usize
+#[derive(Clone, Debug)]
+pub struct YearCount {
+    pub year: u16,
+    pub cited_by_count: u32
 }
 
-struct Grant {
-    funder: String,
-    funder_display_name: String,
-    award_id: String
+#[derive(Clone, Debug)]
+pub struct Grant {
+    pub funder: String,
+    pub funder_display_name: String,
+    pub award_id: String
 }
 
-struct Location {
-    is_oa: bool,
-    landing_page_url: String,
-    license: String,
-    source: DehydratedSource,
-    pdf_url: String,
-    version: String
+#[derive(Clone, Debug)]
+pub struct Location<'a>{
+    pub is_oa: bool,
+    pub landing_page_url: String,
+    pub license: String,
+    pub source: &'a DehydratedSource<'a>,
+    pub pdf_url: String,
+    pub version: String
 }
 
-struct Mesh {
-    descriptor_ui: String,
-    descriptor_name: String,
-    qualifier_ui: String,
-    qualifier_name: String,
-    is_major_topic: bool
+#[derive(Clone, Debug)]
+pub struct Mesh {
+    pub descriptor_ui: String,
+    pub descriptor_name: String,
+    pub qualifier_ui: String,
+    pub qualifier_name: String,
+    pub is_major_topic: bool
 }
 
-struct OpenAccess {
-    is_oa: bool,
-    oa_status: String,
-    oa_url: String,
-    any_repository_has_fulltext: bool
+#[derive(Clone, Debug)]
+pub struct OpenAccess {
+    pub is_oa: bool,
+    pub oa_status: String,
+    pub oa_url: String,
+    pub any_repository_has_fulltext: bool
 }
 
 // OpenAlexAuthor structs
-struct Author {
-    object: OpenAlexObject,
-    display_name_alternatives: &[String],
-    last_known_institution: DehydratedInstitution,
-    orcid: String,
-    summary_stats: SummaryStats,
-    works_api_url: String,
-    works_count: usize
+#[derive(Clone, Debug)]
+pub struct Author<'a>{
+    pub object: OpenAlexObject<'a>,
+    pub display_name_alternatives: &'a [String],
+    pub last_known_institution: DehydratedInstitution,
+    pub orcid: String,
+    pub summary_stats: SummaryStats,
+    pub works_api_url: String,
+    pub works_count: u32
 }
 
-struct SummaryStats {
+#[derive(Clone, Debug)]
+pub struct SummaryStats {
     two_year_mean_citedness: f64,
-    h_index: usize,
-    i10_index: usize
+    h_index: u32,
+    i10_index: u32
 }
 
-struct DehydratedAuthor {
-    id: String,
-    display_name: String,
-    orcid: String
+#[derive(Clone, Debug)]
+pub struct DehydratedAuthor {
+    pub id: String,
+    pub display_name: String,
+    pub orcid: String
 }
 
 // Concept structs
-struct Concept {
-    ancestors: &[DehydratedConcept],
-    object: OpenAlexObject,
-    description: String,
-    image_thumbnail_url: String,
-    image_url: String,
-    level: usize,
-    related_concepts: &[DehydratedConcept],
-    summary_stats: SummaryStats,
-    wikidata: String,
-    works_api_url: &[String],
-    works_count: usize
+#[derive(Clone, Debug)]
+pub struct Concept<'a>{
+    pub ancestors: &'a [DehydratedConcept],
+    pub object: OpenAlexObject<'a>,
+    pub description: String,
+    pub image_thumbnail_url: String,
+    pub image_url: String,
+    pub level: u16,
+    pub related_concepts: &'a [DehydratedConcept],
+    pub summary_stats: SummaryStats,
+    pub wikidata: String,
+    pub works_api_url: &'a [String],
+    pub works_count: u32
 }
 
-struct DehydratedConcept {
-    id: String,
-    wikidata: String,
-    display_name: String,
-    level: usize,
-    score: f64
+#[derive(Clone, Debug)]
+pub struct DehydratedConcept {
+    pub id: String,
+    pub wikidata: String,
+    pub display_name: String,
+    pub level: u16,
+    pub score: f64
 }
 
  // Source structs
-struct Source {
-    object: OpenAlexObject,
-    abreviated_title: String,
-    alternative_titles: &[String],
-    apc_payment: &[Price],
-    apc_usd: u16,
-    country_code: String,
-    homepage_url: String,
-    host_organization: String,
-    host_organization_lineage: &[String],
-    host_organization_name: String,
-    is_in_doaj: bool,
-    is_oa: bool,
-    issn: &[String],
-    issn_l: String,
-    societies: &[Society],
-    summary_stats: SummaryStats,
-    ttype: String,
-    works_api_url: &[String],
-    works_count: usize
+ #[derive(Clone, Debug)]
+pub struct Source<'a>{
+    pub object: OpenAlexObject<'a>,
+    pub abreviated_title: String,
+    pub alternative_titles: &'a [String],
+    pub apc_payment: &'a [Price],
+    pub apc_usd: u16,
+    pub country_code: String,
+    pub homepage_url: String,
+    pub host_organization: String,
+    pub host_organization_lineage: &'a [String],
+    pub host_organization_name: String,
+    pub is_in_doaj: bool,
+    pub is_oa: bool,
+    pub issn: &'a [String],
+    pub issn_l: String,
+    pub societies: &'a [Society],
+    pub summary_stats: SummaryStats,
+    pub ttype: String,
+    pub works_api_url: &'a [String],
+    pub works_count: u32
 }
 
-struct Price {
-    price: u16,
-    currency: String
+#[derive(Clone, Debug)]
+pub struct Price {
+    pub price: u16,
+    pub currency: String
 }
 
-struct Society {
-    url: String,
-    organization: String
+#[derive(Clone, Debug)]
+pub struct Society {
+    pub url: String,
+    pub organization: String
 }
 
-struct DehydratedSource {
-    id: String,
-    display_name: String,
-    issn_l: String,
-    issn: &[String],
-    host_organization: String,
-    ttype: String
+#[derive(Clone, Debug)]
+pub struct DehydratedSource<'a>{
+    pub id: String,
+    pub display_name: String,
+    pub issn_l: String,
+    pub issn: &'a [String],
+    pub host_organization: String,
+    pub ttype: String
 }
 
 // Institution structs
-struct Institution {
-    object: OpenAlexObject,
-    associated_institutions: &[DehydratedInstitution],
-    display_name_alternatives: &[String],
-    country_code: String,
-    geo: Geo,
-    homepage_url: String,
-    repositories: &[DehydratedSource],
-    roles: &[Role],
-    ror: String,
-    summary_stats: SummaryStats,
-    ttype: String,
-    works_api_url: &[String],
-    works_count: usize
+#[derive(Clone, Debug)]
+pub struct Institution<'a>{
+    pub object: OpenAlexObject<'a>,
+    pub associated_institutions: &'a [DehydratedInstitution],
+    pub display_name_alternatives: &'a [String],
+    pub country_code: String,
+    pub geo: Geo,
+    pub homepage_url: String,
+    pub repositories: &'a [DehydratedSource<'a>],
+    pub roles: &'a [Role],
+    pub ror: String,
+    pub summary_stats: SummaryStats,
+    pub ttype: String,
+    pub works_api_url: &'a [String],
+    pub works_count: u32
 }
 
-struct DehydratedInstitution {
-    id: String,
-    display_name: String,
-    ror: String,
-    country_code: String,
-    ttype: String
+#[derive(Clone, Debug)]
+pub struct DehydratedInstitution {
+    pub id: String,
+    pub display_name: String,
+    pub ror: String,
+    pub country_code: String,
+    pub ttype: String
 }
 
-struct Role {
-    role: String,
-    id: String,
-    works_count: usize
+#[derive(Clone, Debug)]
+pub struct Role {
+    pub role: String,
+    pub id: String,
+    pub works_count: u32
 }
 
-struct Geo {
-    city: String,
-    geonames_city_id: String,
-    region: String,
-    country_code: String,
-    country: String,
-    latitude: i32,
-    longitude: i32
+#[derive(Clone, Debug)]
+pub struct Geo {
+    pub city: String,
+    pub geonames_city_id: String,
+    pub region: String,
+    pub country_code: String,
+    pub country: String,
+    pub latitude: i32,
+    pub longitude: i32
 }
 
 // Publisher structs
-struct Publisher {
-    object: OpenAlexObject,
-    alternative_titles: &[String],
-    country_codes: &[String],
-    hierarchy_level: usize,
-    image_thumbnail_url: String,
-    image_url: String,
-    lineage: &[string],
-    parent_publisher: String,
-    roles: &[Role],
-    sources_api_url: &[String],
-    summary_stats: SummaryStats,
-    works_count: usize
+#[derive(Clone, Debug)]
+pub struct Publisher<'a>{
+    pub object: OpenAlexObject<'a>,
+    pub alternative_titles: &'a [String],
+    pub country_codes: &'a [String],
+    pub hierarchy_level: u16,
+    pub image_thumbnail_url: String,
+    pub image_url: String,
+    pub lineage: &'a [String],
+    pub parent_publisher: String,
+    pub roles: &'a [Role],
+    pub sources_api_url: &'a [String],
+    pub summary_stats: SummaryStats,
+    pub works_count: u32
 }
 
 // Funder structs
-struct Funder {
-    object: OpenAlexObject,
-    alternative_titles: &[String],
-    country_code: String,
-    description: String,
-    grants_count: usize,
-    homepage_url: String,
-    image_thumbnail_url: String,
-    image_url: String,
-    roles: &[Role],
-    summary_stats: SummaryStats,
-    works_count: usize
+#[derive(Clone, Debug)]
+pub struct Funder<'a>{
+    pub object: OpenAlexObject<'a>,
+    pub alternative_titles: &'a [String],
+    pub country_code: String,
+    pub description: String,
+    pub grants_count: u32,
+    pub homepage_url: String,
+    pub image_thumbnail_url: String,
+    pub image_url: String,
+    pub roles: &'a [Role],
+    pub summary_stats: SummaryStats,
+    pub works_count: u32
 }

@@ -4,6 +4,7 @@ members = [
     "trustfall_core",
     "trustfall_filetests_macros",
     "trustfall_derive",
+    "trustfall-openalex-adapter",
     "trustfall_wasm",
     "pytrustfall",
     "demo-hytradboi",

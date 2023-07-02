@@ -1690,6 +1690,33 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
 
 [[package]]
+name = "openalex_adapter"
+version = "0.1.0"
+dependencies = [
+ "async-graphql-parser",
+ "async-graphql-value",
+ "base64 0.13.1",
+ "chrono",
+ "consecrates",
+ "csv",
+ "futures-executor",
+ "git-url-parse",
+ "hn_api",
+ "itertools",
+ "lazy_static",
+ "maplit",
+ "octorust",
+ "regex",
+ "reqwest 0.11.10",
+ "ron 0.6.6",
+ "serde",
+ "serde_json",
+ "tokio 1.27.0",
+ "trustfall_core",
+ "yaml-rust",
+]
+
+[[package]]
 name = "openssl"
 version = "0.10.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
