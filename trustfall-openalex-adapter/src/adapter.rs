@@ -315,9 +315,7 @@ impl Adapter<'static> for AlexAdapter {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
               let work = vertex.as_work().expect("vertex was not a work")
-              let author_ids = work.authorships.iter().map(|authorship| {
-                authorship.author.id
-              });
+              let cited_by_ids = work.cited_by_api_url
 
               let neighbors_iter =
                 author_ids.into_iter().filter_map(move |author_id| {
@@ -460,22 +458,223 @@ impl Adapter<'static> for AlexAdapter {
 
       }
       "Author" => match edge_name.as_ref() {
-        "Institution" => {}
-        "Works" => {}
+        "Institution" => Box::new(contexts.map(move |ctx| {
+          let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
+            None => Box::new(std::iter::empty()),
+            Some(vertex) => {
+              let author = vertex.as_author().expect("vertex was not a work")
+              let institution_id = author.last_known_institution.id;
+
+              let neighbors_iter = match institution_id {
+                Ok(None) => None,
+                Ok(Some(institution_id)) => {}
+                Err(error) => {
+                  eprintln!(
+                    "API error while fetching author with id {author_id}: {author_id}"
+                  );
+                  None
+                }
+              }
+
+              Box::new(neighbors_iter)
+            }
+          };
+
+          (ctx, neighbors)
+        })),
+        "Works" => Box::new(contexts.map(move |ctx| {
+          let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
+            None => Box::new(std::iter::empty()),
+            Some(vertex) => {
+              let author = vertex.as_author().expect("vertex was not a work")
+              let works_ids = author.works_api_url;
+
+              let neighbors_iter =
+                works_ids.into_iter().filter_map(move |author_id| {
+                  match author_id {
+                    Ok(None) => None,
+                    Ok(Some(author)) => {None},
+                    Err(error) => {
+                      eprintln!(
+                        "API error while fetching author with id {author_id}: {author_id}"
+                      );
+                      None
+                    }
+                  }
+                });
+
+              Box::new(neighbors_iter)
+            }
+          };
+
+          (ctx, neighbors)
+        })),
         _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
       }
       "Source" => match edge_name.as_ref() {
-        "Host" => {}
-        "Lineage" => {}
-        "Works" => {}
+        "Host" => Box::new(contexts.map(move |ctx| {
+          let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
+            None => Box::new(std::iter::empty()),
+            Some(vertex) => {
+              let source = vertex.as_source().expect("vertex was not a work")
+              let host_id = source.host_organization;
+
+              let neighbors_iter = match host_id {
+                Ok(None) => None,
+                Ok(Some(institution)) => {}
+                Err(error) => {
+                  eprintln!(
+                    "API error while fetching author with id {author_id}: {author_id}"
+                  );
+                  None
+                }
+              }
+
+              Box::new(neighbors_iter)
+            }
+          };
+
+          (ctx, neighbors)
+        })),
+
+        "Lineage" => Box::new(contexts.map(move |ctx| {
+          let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
+            None => Box::new(std::iter::empty()),
+            Some(vertex) => {
+              let source = vertex.as_source().expect("vertex was not a work")
+              let host_lineage_ids = source.host_organization_lineage;
+
+              let neighbors_iter = 
+                host_lineage_ids.into_iter().filter_map(move |host_id| {
+                  match host_id {
+                    Ok(None) => None,
+                    Ok(Some(institution)) => {}
+                    Err(error) => {
+                      eprintln!(
+                        "API error while fetching author with id {author_id}: {author_id}"
+                      );
+                      None
+                    }
+                  }
+                });
+
+              Box::new(neighbors_iter)
+            }
+          };
+        "Works" => Box::new(contexts.map(move |ctx| {
+          let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
+            None => Box::new(std::iter::empty()),
+            Some(vertex) => {
+              let source = vertex.as_source().expect("vertex was not a work")
+              let works_api_url = source.works_api_url;
+
+              let neighbors_iter = match works_api_url {
+                Ok(None) => None,
+                Ok(Some(institution)) => {}
+                Err(error) => {
+                  eprintln!(
+                    "API error while fetching author with id {author_id}: {author_id}"
+                  );
+                  None
+                }
+              }
+
+              Box::new(neighbors_iter)
+            }
+          };
+
+          (ctx, neighbors)
+        })),
         _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
       }
+
       "Concept" => match edge_name.as_ref() {
-        "Ancestors" => {}
-        "Related" => {}
-        "Works" => {}
+        "Ancestors" => Box::new(contexts.map(move |ctx| {
+          let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
+            None => Box::new(std::iter::empty()),
+            Some(vertex) => {
+              let concept = vertex.as_concept().expect("vertex was not a concept")
+              let ancestors = source.ancestors;
+
+              let neighbors_iter = 
+                ancestors.into_iter().filter_map(move |ancestor| {
+                  match ancestor {
+                    Ok(None) => None,
+                    Ok(Some(institution)) => {}
+                    Err(error) => {
+                      eprintln!(
+                        "API error while fetching author with id {author_id}: {author_id}"
+                      );
+                      None
+                    }
+                  }
+                });
+
+              Box::new(neighbors_iter)
+            }
+          };
+
+          (ctx, neighbors)
+        })),
+
+        "Related" => Box::new(contexts.map(move |ctx| {
+          let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
+            None => Box::new(std::iter::empty()),
+            Some(vertex) => {
+              let concept = vertex.as_concept().expect("vertex was not a concept")
+              let related_concepts = source.related_concepts;
+
+              let neighbors_iter = 
+                related_concepts.into_iter().filter_map(move |related| {
+                  match ancestor {
+                    Ok(None) => None,
+                    Ok(Some(institution)) => {}
+                    Err(error) => {
+                      eprintln!(
+                        "API error while fetching author with id {author_id}: {author_id}"
+                      );
+                      None
+                    }
+                  }
+                });
+
+              Box::new(neighbors_iter)
+            }
+          };
+
+          (ctx, neighbors)
+        })),
+
+        "Works" => Box::new(contexts.map(move |ctx| {
+          let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
+            None => Box::new(std::iter::empty()),
+            Some(vertex) => {
+              let concept = vertex.as_concept().expect("vertex was not a concept")
+              let works_api_url = source.works_api_url;
+
+              let neighbors_iter = 
+                works_api_url.into_iter().filter_map(move |ancestor| {
+                  match ancestor {
+                    Ok(None) => None,
+                    Ok(Some(institution)) => {}
+                    Err(error) => {
+                      eprintln!(
+                        "API error while fetching author with id {author_id}: {author_id}"
+                      );
+                      None
+                    }
+                  }
+                });
+
+              Box::new(neighbors_iter)
+            }
+          };
+
+          (ctx, neighbors)
+        })),
         _ => unreachable!("resolve_neighbors {type_name} {edge_name}")
       }
+
       "Institution" => match edge_name.as_ref() {
         "Associated" => {}
         "Repositories" => {}
