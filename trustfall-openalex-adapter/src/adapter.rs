@@ -2,7 +2,7 @@ use std::{fs, rc::Rc, sync::Arc};
 
 use regex::internal::Inst;
 use reqwest::Client;
-use serde_json::Value;
+use serde_json::{Result, Value};
 use lazy_static::lazy_static;
 use trustfall_core::{
   interpreter::{
@@ -11,12 +11,13 @@ use trustfall_core::{
   },
   ir::{EdgeParameters, FieldValue},
 };
-use crate::vertex::{
+use crate::{vertex::{
   Vertex, Work, Author, Concept, Source, Institution, Publisher, Funder
-};
+}, fetch::fetch_vertex};
+use crate::fetch;
 
 lazy_static! {
-  static ref OA_Client: Client = reqwest::Client::new();
+  static ref OPEN_ALEX_CLIENT: Client = reqwest::Client::new();
 }
 
 fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
@@ -284,23 +285,14 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let work = vertex.as_work().expect("vertex was not a work")
+              let work = vertex.as_work().expect("vertex was not a work");
               let author_ids = work.authorships.iter().map(|authorship| {
                 authorship.author.id
               });
 
               let neighbors_iter =
                 author_ids.into_iter().filter_map(move |author_id| {
-                  match author_id {
-                    Ok(None) => None,
-                    Ok(Some(author)) => {None},
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
+                  fetch_vertex(author_id, "Author")
                 });
 
               Box::new(neighbors_iter)
@@ -314,8 +306,8 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let work = vertex.as_work().expect("vertex was not a work")
-              let cited_by_ids = work.cited_by_api_url
+              let work = vertex.as_work().expect("vertex was not a work");
+              let cited_by_ids = work.cited_by_api_url;
 
               let neighbors_iter =
                 author_ids.into_iter().filter_map(move |author_id| {
@@ -342,23 +334,14 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let work = vertex.as_work().expect("vertex was not a work")
+              let work = vertex.as_work().expect("vertex was not a work");
               let concept_ids = work.concepts.iter().map(|concept| {
                 concept.id
               });
 
               let neighbors_iter =
-                concept_ids.into_iter().filter_map(move |author_id| {
-                  match author_id {
-                    Ok(None) => None,
-                    Ok(Some(author)) => {None},
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
+                concept_ids.into_iter().filter_map(move |concept_id| {
+                  fetch_vertex(concept_id, "Concept")
                 });
 
               Box::new(neighbors_iter)
@@ -378,17 +361,8 @@ impl Adapter<'static> for AlexAdapter {
               });
 
               let neighbors_iter =
-                funder_ids.into_iter().filter_map(move |author_id| {
-                  match author_id {
-                    Ok(None) => None,
-                    Ok(Some(author)) => {None},
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
+                funder_ids.into_iter().filter_map(move |funder_id| {
+                  fetch_vertex(funder_id, "Funder")
                 });
 
               Box::new(neighbors_iter)
@@ -406,17 +380,8 @@ impl Adapter<'static> for AlexAdapter {
               let reference_ids = work.referenced_works;
 
               let neighbors_iter =
-                reference_ids.into_iter().filter_map(move |author_id| {
-                  match author_id {
-                    Ok(None) => None,
-                    Ok(Some(author)) => {None},
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
+                reference_ids.into_iter().filter_map(move |reference_id| {
+                  fetch_vertex(reference_id, "Work")
                 });
 
               Box::new(neighbors_iter)
@@ -434,17 +399,8 @@ impl Adapter<'static> for AlexAdapter {
               let related_ids = work.related_works;
 
               let neighbors_iter =
-                related_ids.into_iter().filter_map(move |author_id| {
-                  match author_id {
-                    Ok(None) => None,
-                    Ok(Some(author)) => {None},
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
+                related_ids.into_iter().filter_map(move |related_id| {
+                  fetch_vertex(related_id, "Work")
                 });
 
               Box::new(neighbors_iter)
@@ -462,19 +418,10 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let author = vertex.as_author().expect("vertex was not a work")
+              let author = vertex.as_author().expect("vertex was not a work");
               let institution_id = author.last_known_institution.id;
 
-              let neighbors_iter = match institution_id {
-                Ok(None) => None,
-                Ok(Some(institution_id)) => {}
-                Err(error) => {
-                  eprintln!(
-                    "API error while fetching author with id {author_id}: {author_id}"
-                  );
-                  None
-                }
-              }
+              let neighbors_iter = fetch_vertex(institution_id, "Institution");
 
               Box::new(neighbors_iter)
             }
@@ -519,16 +466,7 @@ impl Adapter<'static> for AlexAdapter {
               let source = vertex.as_source().expect("vertex was not a work")
               let host_id = source.host_organization;
 
-              let neighbors_iter = match host_id {
-                Ok(None) => None,
-                Ok(Some(institution)) => {}
-                Err(error) => {
-                  eprintln!(
-                    "API error while fetching author with id {author_id}: {author_id}"
-                  );
-                  None
-                }
-              }
+              let neighbors_iter = fetch_vertex(host_id, "Institution");
 
               Box::new(neighbors_iter)
             }
@@ -561,6 +499,10 @@ impl Adapter<'static> for AlexAdapter {
               Box::new(neighbors_iter)
             }
           };
+
+          (ctx, neighbors)
+        })),
+
         "Works" => Box::new(contexts.map(move |ctx| {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
@@ -594,20 +536,11 @@ impl Adapter<'static> for AlexAdapter {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
               let concept = vertex.as_concept().expect("vertex was not a concept")
-              let ancestors = source.ancestors;
+              let ancestors = concept.ancestors;
 
               let neighbors_iter = 
                 ancestors.into_iter().filter_map(move |ancestor| {
-                  match ancestor {
-                    Ok(None) => None,
-                    Ok(Some(institution)) => {}
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
+                  fetch_vertex(ancestor, "Concept")
                 });
 
               Box::new(neighbors_iter)
@@ -622,20 +555,11 @@ impl Adapter<'static> for AlexAdapter {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
               let concept = vertex.as_concept().expect("vertex was not a concept")
-              let related_concepts = source.related_concepts;
+              let related_concepts = concept.related_concepts;
 
               let neighbors_iter = 
                 related_concepts.into_iter().filter_map(move |related| {
-                  match ancestor {
-                    Ok(None) => None,
-                    Ok(Some(institution)) => {}
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
+                  fetch_vertex(related, "Concept")
                 });
 
               Box::new(neighbors_iter)
@@ -650,7 +574,7 @@ impl Adapter<'static> for AlexAdapter {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
               let concept = vertex.as_concept().expect("vertex was not a concept")
-              let works_api_url = source.works_api_url;
+              let works_api_url = concept.works_api_url;
 
               let neighbors_iter = 
                 works_api_url.into_iter().filter_map(move |ancestor| {
