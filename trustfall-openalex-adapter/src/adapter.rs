@@ -1,5 +1,6 @@
 use std::{fs, rc::Rc, sync::Arc};
 
+use futures_executor::block_on
 use regex::internal::Inst;
 use reqwest::Client;
 use serde_json::{Result, Value};
@@ -12,13 +13,8 @@ use trustfall_core::{
   ir::{EdgeParameters, FieldValue},
 };
 use crate::{vertex::{
-  Vertex, Work, Author, Concept, Source, Institution, Publisher, Funder
-}, fetch::fetch_vertex};
-use crate::fetch;
-
-lazy_static! {
-  static ref OPEN_ALEX_CLIENT: Client = reqwest::Client::new();
-}
+  Vertex, VertexKind, Work, Author, Concept, Source, Institution, Publisher, Funder
+}, fetch::{fetch_vertex, fetch_vertices}};
 
 fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
   let work = vertex.as_work().expect("Vertex was not a work");
@@ -172,11 +168,11 @@ fn get_funder_property(vertex: &Vertex, field_name: &str) -> FieldValue {
   }
 }
 
-fn property_mapper<'a>(
-  ctx: DataContext<Vertex<'a>>,
+fn property_mapper(
+  ctx: DataContext<Vertex>,
   field_name: &str,
   property_getter: fn(&Vertex, &str) -> FieldValue,
-) -> (DataContext<Vertex<'a>>, FieldValue) {
+) -> (DataContext<Vertex>, FieldValue) {
   let value = match ctx.active_vertex() {
       Some(vertex) => property_getter(vertex, field_name),
       None => FieldValue::Null,
@@ -202,7 +198,7 @@ impl AlexAdapter {
 }
 
 impl Adapter<'static> for AlexAdapter {
-  type Vertex = Vertex<'static>;
+  type Vertex = Vertex;
 
   fn resolve_starting_vertices(
     &self,
@@ -291,8 +287,16 @@ impl Adapter<'static> for AlexAdapter {
               });
 
               let neighbors_iter =
-                author_ids.into_iter().filter_map(move |author_id| {
-                  fetch_vertex(author_id, "Author")
+                author_ids.filter_map(move |author_id| {
+                  match fetch_vertex(author_id, VertexKind::Author) {
+                    Ok(author_vertex) => Some(author_vertex),
+                    Err(e) => {
+                        eprintln!(
+                            "API error while fetching or deserializing {author_id}"
+                        );
+                        None
+                    }
+                  }
                 });
 
               Box::new(neighbors_iter)
@@ -309,21 +313,15 @@ impl Adapter<'static> for AlexAdapter {
               let work = vertex.as_work().expect("vertex was not a work");
               let cited_by_ids = work.cited_by_api_url;
 
-              let neighbors_iter =
-                author_ids.into_iter().filter_map(move |author_id| {
-                  match author_id {
-                    Ok(None) => None,
-                    Ok(Some(author)) => {None},
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
-                });
-
-              Box::new(neighbors_iter)
+              match fetch_vertices(cited_by_ids, VertexKind::Work) {
+                Ok(cited_by_vertices) => Box::new(cited_by_vertices.into_iter()),
+                Err(e) => {
+                    eprintln!(
+                        "API error while fetching or deserializing {cited_by_ids}"
+                    );
+                    Box::new(std::iter::empty())
+                }
+              }
             }
           };
 
@@ -340,8 +338,16 @@ impl Adapter<'static> for AlexAdapter {
               });
 
               let neighbors_iter =
-                concept_ids.into_iter().filter_map(move |concept_id| {
-                  fetch_vertex(concept_id, "Concept")
+                concept_ids.filter_map(move |concept_id| {
+                  match fetch_vertex(concept_id, VertexKind::Concept) {
+                    Ok(concept_vertex) => Some(concept_vertex),
+                    Err(e) => {
+                        eprintln!(
+                            "API error while fetching or deserializing {concept_id}"
+                        );
+                        None
+                    }
+                  }
                 });
 
               Box::new(neighbors_iter)
@@ -355,14 +361,22 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let work = vertex.as_work().expect("vertex was not a work")
+              let work = vertex.as_work().expect("vertex was not a work");
               let funder_ids = work.grants.iter().map(|grant| {
                 grant.funder
               });
 
               let neighbors_iter =
-                funder_ids.into_iter().filter_map(move |funder_id| {
-                  fetch_vertex(funder_id, "Funder")
+                funder_ids.filter_map(move |funder_id| {
+                  match fetch_vertex(funder_id, VertexKind::Funder) {
+                    Ok(funder_vertex) => Some(funder_vertex),
+                    Err(e) => {
+                        eprintln!(
+                            "API error while fetching or deserializing {funder_id}"
+                        );
+                        None
+                    }
+                  }
                 });
 
               Box::new(neighbors_iter)
@@ -381,7 +395,15 @@ impl Adapter<'static> for AlexAdapter {
 
               let neighbors_iter =
                 reference_ids.into_iter().filter_map(move |reference_id| {
-                  fetch_vertex(reference_id, "Work")
+                    match fetch_vertex(reference_id, VertexKind::Work) {
+                        Ok(work_vertex) => Some(work_vertex),
+                        Err(e) => {
+                            eprintln!(
+                                "API error while fetching or deserializing {reference_id}"
+                            );
+                            None
+                        }
+                    }
                 });
 
               Box::new(neighbors_iter)
@@ -395,12 +417,20 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let work = vertex.as_work().expect("vertex was not a work")
+              let work = vertex.as_work().expect("vertex was not a work");
               let related_ids = work.related_works;
 
               let neighbors_iter =
                 related_ids.into_iter().filter_map(move |related_id| {
-                  fetch_vertex(related_id, "Work")
+                    match fetch_vertex(related_id, VertexKind::Work) {
+                        Ok(work_vertex) => Some(work_vertex),
+                        Err(e) => {
+                            eprintln!(
+                                "API error while fetching or deserializing {related_id}"
+                            );
+                            None
+                        }
+                      }
                 });
 
               Box::new(neighbors_iter)
@@ -421,9 +451,15 @@ impl Adapter<'static> for AlexAdapter {
               let author = vertex.as_author().expect("vertex was not a work");
               let institution_id = author.last_known_institution.id;
 
-              let neighbors_iter = fetch_vertex(institution_id, "Institution");
-
-              Box::new(neighbors_iter)
+              match fetch_vertex(institution_id, VertexKind::Institution) {
+                Ok(institution_vertex) => Box::new(std::iter::once(institution_vertex)),
+                Err(e) => {
+                    eprintln!(
+                        "API error while fetching or deserializing {institution_id}"
+                    );
+                    Box::new(std::iter::empty())
+                }
+              }
             }
           };
 
@@ -433,24 +469,18 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let author = vertex.as_author().expect("vertex was not a work")
+              let author = vertex.as_author().expect("vertex was not a work");
               let works_ids = author.works_api_url;
 
-              let neighbors_iter =
-                works_ids.into_iter().filter_map(move |author_id| {
-                  match author_id {
-                    Ok(None) => None,
-                    Ok(Some(author)) => {None},
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
-                });
-
-              Box::new(neighbors_iter)
+              match fetch_vertices(works_ids, VertexKind::Work) {
+                Ok(work_vertices) => Box::new(work_vertices.into_iter()),
+                Err(e) => {
+                    eprintln!(
+                        "API error while fetching or deserializing {works_ids}"
+                    );
+                    Box::new(std::iter::empty())
+                }
+              }
             }
           };
 
@@ -463,12 +493,18 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let source = vertex.as_source().expect("vertex was not a work")
+              let source = vertex.as_source().expect("vertex was not a work");
               let host_id = source.host_organization;
 
-              let neighbors_iter = fetch_vertex(host_id, "Institution");
-
-              Box::new(neighbors_iter)
+              match fetch_vertex(host_id, VertexKind::Institution) {
+                Ok(institution_vertex) => Box::new(std::iter::once(institution_vertex)),
+                Err(e) => {
+                    eprintln!(
+                        "API error while fetching or deserializing {host_id}"
+                    );
+                    Box::new(std::iter::empty())
+                }
+              }
             }
           };
 
@@ -479,19 +515,18 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let source = vertex.as_source().expect("vertex was not a work")
+              let source = vertex.as_source().expect("vertex was not a work");
               let host_lineage_ids = source.host_organization_lineage;
 
               let neighbors_iter = 
                 host_lineage_ids.into_iter().filter_map(move |host_id| {
-                  match host_id {
-                    Ok(None) => None,
-                    Ok(Some(institution)) => {}
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
+                  match fetch_vertex(host_id, VertexKind::Institution) {
+                    Ok(institution_vertex) => Some(institution_vertex),
+                    Err(e) => {
+                        eprintln!(
+                            "API error while fetching or deserializing {host_id}"
+                        );
+                        None
                     }
                   }
                 });
@@ -507,21 +542,18 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let source = vertex.as_source().expect("vertex was not a work")
+              let source = vertex.as_source().expect("vertex was not a work");
               let works_api_url = source.works_api_url;
 
-              let neighbors_iter = match works_api_url {
-                Ok(None) => None,
-                Ok(Some(institution)) => {}
-                Err(error) => {
-                  eprintln!(
-                    "API error while fetching author with id {author_id}: {author_id}"
-                  );
-                  None
+              match fetch_vertices(works_api_url, VertexKind::Work) {
+                Ok(work_vertices) => Box::new(work_vertices.into_iter()),
+                Err(e) => {
+                    eprintln!(
+                        "API error while fetching or deserializing {works_api_url}"
+                    );
+                    Box::new(std::iter::empty())
                 }
               }
-
-              Box::new(neighbors_iter)
             }
           };
 
@@ -535,12 +567,20 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let concept = vertex.as_concept().expect("vertex was not a concept")
-              let ancestors = concept.ancestors;
+              let concept = vertex.as_concept().expect("vertex was not a concept");
+              let ancestor_ids = concept.ancestors.iter().map(|ancestor| ancestor.id);
 
               let neighbors_iter = 
-                ancestors.into_iter().filter_map(move |ancestor| {
-                  fetch_vertex(ancestor, "Concept")
+                ancestor_ids.filter_map(move |ancestor| {
+                  match fetch_vertex(ancestor, VertexKind::Concept) {
+                    Ok(concept_vertex) => Some(concept_vertex),
+                    Err(e) => {
+                        eprintln!(
+                            "API error while fetching or deserializing {ancestor}"
+                        );
+                        None
+                    }
+                  }
                 });
 
               Box::new(neighbors_iter)
@@ -554,12 +594,20 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let concept = vertex.as_concept().expect("vertex was not a concept")
-              let related_concepts = concept.related_concepts;
+              let concept = vertex.as_concept().expect("vertex was not a concept");
+              let related_concept_ids = concept.related_concepts.iter().map(|concept| concept.id);
 
               let neighbors_iter = 
-                related_concepts.into_iter().filter_map(move |related| {
-                  fetch_vertex(related, "Concept")
+                related_concept_ids.filter_map(move |related_id| {
+                  match fetch_vertex(related_id, VertexKind::Concept) {
+                    Ok(concept_vertex) => Some(concept_vertex),
+                    Err(e) => {
+                        eprintln!(
+                            "API error while fetching or deserializing {related_id}"
+                        );
+                        None
+                    }
+                  }
                 });
 
               Box::new(neighbors_iter)
@@ -573,24 +621,18 @@ impl Adapter<'static> for AlexAdapter {
           let neighbors: VertexIterator<'static, Self::Vertex> = match ctx.active_vertex() {
             None => Box::new(std::iter::empty()),
             Some(vertex) => {
-              let concept = vertex.as_concept().expect("vertex was not a concept")
+              let concept = vertex.as_concept().expect("vertex was not a concept");
               let works_api_url = concept.works_api_url;
 
-              let neighbors_iter = 
-                works_api_url.into_iter().filter_map(move |ancestor| {
-                  match ancestor {
-                    Ok(None) => None,
-                    Ok(Some(institution)) => {}
-                    Err(error) => {
-                      eprintln!(
-                        "API error while fetching author with id {author_id}: {author_id}"
-                      );
-                      None
-                    }
-                  }
-                });
-
-              Box::new(neighbors_iter)
+              match fetch_vertices(works_api_url, VertexKind::Work) {
+                Ok(work_vertices) => Box::new(work_vertices.into_iter()),
+                Err(e) => {
+                    eprintln!(
+                        "API error while fetching or deserializing {works_api_url}"
+                    );
+                    Box::new(std::iter::empty())
+                } 
+              }
             }
           };
 

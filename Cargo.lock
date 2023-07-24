@@ -1699,7 +1699,6 @@ dependencies = [
  "chrono",
  "consecrates",
  "csv",
- "futures-executor",
  "git-url-parse",
  "hn_api",
  "itertools",

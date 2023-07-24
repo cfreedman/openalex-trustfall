@@ -8,11 +8,34 @@ pub enum Vertex {
     Source(Source),
     Institution(Institution),
     Publisher(Publisher),
-    Funder(Funder)
+    Funder(Funder),
+}
+
+pub enum VertexKind {
+    Work,
+    Author,
+    Concept,
+    Source,
+    Institution,
+    Publisher,
+    Funder,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct FilteredVertices<T> {
+    pub results: Vec<T>,
+    meta: MetaData,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct MetaData {
+    count: u32,
+    db_response_time_ms: u32,
+    page: u32,
+    per_page: u32,
 }
 
 impl Vertex {
-
     pub fn typename<'a>(&self) -> &'a str {
         match self {
             Vertex::Work(..) => "Work",
@@ -25,49 +48,49 @@ impl Vertex {
         }
     }
 
-    pub fn as_work(&self) -> Option<&Work>{
+    pub fn as_work(&self) -> Option<&Work> {
         match self {
             Vertex::Work(work) => Some(work),
             _ => None,
         }
     }
 
-    pub fn as_author(&self) -> Option<&Author>{
+    pub fn as_author(&self) -> Option<&Author> {
         match self {
             Vertex::Author(author) => Some(author),
             _ => None,
         }
     }
 
-    pub fn as_concept(&self) -> Option<&Concept>{
+    pub fn as_concept(&self) -> Option<&Concept> {
         match self {
             Vertex::Concept(concept) => Some(concept),
             _ => None,
         }
     }
 
-    pub fn as_source(&self) -> Option<&Source>{
+    pub fn as_source(&self) -> Option<&Source> {
         match self {
             Vertex::Source(source) => Some(source),
             _ => None,
         }
     }
 
-    pub fn as_institution(&self) -> Option<&Institution>{
+    pub fn as_institution(&self) -> Option<&Institution> {
         match self {
             Vertex::Institution(institution) => Some(institution),
             _ => None,
         }
     }
 
-    pub fn as_publisher(&self) -> Option<&Publisher>{
+    pub fn as_publisher(&self) -> Option<&Publisher> {
         match self {
             Vertex::Publisher(publisher) => Some(publisher),
             _ => None,
         }
     }
 
-    pub fn as_funder(&self) -> Option<&Funder>{
+    pub fn as_funder(&self) -> Option<&Funder> {
         match self {
             Vertex::Funder(funder) => Some(funder),
             _ => None,
@@ -87,7 +110,7 @@ pub struct OpenAlexObject {
 }
 // OpenAlexWork structs
 #[derive(Clone, Debug, Deserialize)]
-pub struct Work{
+pub struct Work {
     pub object: OpenAlexObject,
     pub abstract_text: String,
     pub authorships: Vec<Authorship>,
@@ -117,14 +140,14 @@ pub struct Work{
     pub is_oa: bool,
     pub license: String,
     pub url: String,
-    pub version: String
+    pub version: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct Authorship{
+pub struct Authorship {
     pub author_position: String,
     pub author: DehydratedAuthor,
-    pub institutions: Vec<DehydratedInstitution>
+    pub institutions: Vec<DehydratedInstitution>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -140,30 +163,30 @@ pub struct Biblio {
     pub volume: String,
     pub issue: String,
     pub first_page: String,
-    pub last_page: String
+    pub last_page: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct YearCount {
     pub year: u16,
-    pub cited_by_count: u32
+    pub cited_by_count: u32,
 }
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Grant {
     pub funder: String,
     pub funder_display_name: String,
-    pub award_id: String
+    pub award_id: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct Location{
+pub struct Location {
     pub is_oa: bool,
     pub landing_page_url: String,
     pub license: String,
     pub source: DehydratedSource,
     pub pdf_url: String,
-    pub version: String
+    pub version: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -172,7 +195,7 @@ pub struct Mesh {
     pub descriptor_name: String,
     pub qualifier_ui: String,
     pub qualifier_name: String,
-    pub is_major_topic: bool
+    pub is_major_topic: bool,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -180,38 +203,38 @@ pub struct OpenAccess {
     pub is_oa: bool,
     pub oa_status: String,
     pub oa_url: String,
-    pub any_repository_has_fulltext: bool
+    pub any_repository_has_fulltext: bool,
 }
 
 // OpenAlexAuthor structs
-#[derive(Clone, Debug)]
-pub struct Author{
+#[derive(Clone, Debug, Deserialize)]
+pub struct Author {
     pub object: OpenAlexObject,
     pub display_name_alternatives: Vec<String>,
     pub last_known_institution: DehydratedInstitution,
     pub orcid: String,
     pub summary_stats: SummaryStats,
     pub works_api_url: String,
-    pub works_count: u32
+    pub works_count: u32,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct SummaryStats {
     two_year_mean_citedness: f64,
     h_index: u32,
-    i10_index: u32
+    i10_index: u32,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct DehydratedAuthor {
     pub id: String,
     pub display_name: String,
-    pub orcid: String
+    pub orcid: String,
 }
 
 // Concept structs
-#[derive(Clone, Debug)]
-pub struct Concept{
+#[derive(Clone, Debug, Deserialize)]
+pub struct Concept {
     pub ancestors: Vec<DehydratedConcept>,
     pub object: OpenAlexObject,
     pub description: String,
@@ -222,21 +245,21 @@ pub struct Concept{
     pub summary_stats: SummaryStats,
     pub wikidata: String,
     pub works_api_url: String,
-    pub works_count: u32
+    pub works_count: u32,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct DehydratedConcept {
     pub id: String,
     pub wikidata: String,
     pub display_name: String,
     pub level: u16,
-    pub score: f64
+    pub score: f64,
 }
 
- // Source structs
- #[derive(Clone, Debug)]
-pub struct Source{
+// Source structs
+#[derive(Clone, Debug, Deserialize)]
+pub struct Source {
     pub object: OpenAlexObject,
     pub abreviated_title: String,
     pub alternative_titles: Vec<String>,
@@ -255,34 +278,34 @@ pub struct Source{
     pub summary_stats: SummaryStats,
     pub ttype: String,
     pub works_api_url: String,
-    pub works_count: u32
+    pub works_count: u32,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Price {
     pub price: u16,
-    pub currency: String
+    pub currency: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Society {
     pub url: String,
-    pub organization: String
+    pub organization: String,
 }
 
-#[derive(Clone, Debug)]
-pub struct DehydratedSource{
+#[derive(Clone, Debug, Deserialize)]
+pub struct DehydratedSource {
     pub id: String,
     pub display_name: String,
     pub issn_l: String,
     pub issn: Vec<String>,
     pub host_organization: String,
-    pub ttype: String
+    pub ttype: String,
 }
 
 // Institution structs
-#[derive(Clone, Debug)]
-pub struct Institution{
+#[derive(Clone, Debug, Deserialize)]
+pub struct Institution {
     pub object: OpenAlexObject,
     pub associated_institutions: Vec<DehydratedInstitution>,
     pub display_name_alternatives: Vec<String>,
@@ -295,26 +318,26 @@ pub struct Institution{
     pub summary_stats: SummaryStats,
     pub ttype: String,
     pub works_api_url: String,
-    pub works_count: u32
+    pub works_count: u32,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct DehydratedInstitution {
     pub id: String,
     pub display_name: String,
     pub ror: String,
     pub country_code: String,
-    pub ttype: String
+    pub ttype: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Role {
     pub role: String,
     pub id: String,
-    pub works_count: u32
+    pub works_count: u32,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Geo {
     pub city: String,
     pub geonames_city_id: String,
@@ -322,12 +345,12 @@ pub struct Geo {
     pub country_code: String,
     pub country: String,
     pub latitude: i32,
-    pub longitude: i32
+    pub longitude: i32,
 }
 
 // Publisher structs
-#[derive(Clone, Debug)]
-pub struct Publisher{
+#[derive(Clone, Debug, Deserialize)]
+pub struct Publisher {
     pub object: OpenAlexObject,
     pub alternative_titles: Vec<String>,
     pub country_codes: Vec<String>,
@@ -339,12 +362,12 @@ pub struct Publisher{
     pub roles: Vec<Role>,
     pub sources_api_url: String,
     pub summary_stats: SummaryStats,
-    pub works_count: u32
+    pub works_count: u32,
 }
 
 // Funder structs
-#[derive(Clone, Debug)]
-pub struct Funder{
+#[derive(Clone, Debug, Deserialize)]
+pub struct Funder {
     pub object: OpenAlexObject,
     pub alternative_titles: Vec<String>,
     pub country_code: String,
@@ -355,5 +378,5 @@ pub struct Funder{
     pub image_url: String,
     pub roles: Vec<Role>,
     pub summary_stats: SummaryStats,
-    pub works_count: u32
+    pub works_count: u32,
 }
