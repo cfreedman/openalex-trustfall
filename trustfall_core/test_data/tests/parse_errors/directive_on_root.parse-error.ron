@@ -1,4 +1,0 @@
-Err(DirectiveNotInsideQueryRoot("output", Pos(
-  line: 3,
-  column: 20,
-)))

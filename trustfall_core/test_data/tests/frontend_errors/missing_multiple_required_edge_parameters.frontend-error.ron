@@ -1,4 +1,0 @@
-Err(MultipleErrors(DisplayVec([
-  MissingRequiredEdgeParameter("max", "Number"),
-  MissingRequiredEdgeParameter("max", "multiple"),
-])))

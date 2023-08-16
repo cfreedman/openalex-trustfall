@@ -1,4 +1,0 @@
-MultipleErrors(DisplayVec([
-  ArgumentTypeError("num", "Int", String("four")),
-  ArgumentTypeError("substr", "String!", Int64(4)),
-]))

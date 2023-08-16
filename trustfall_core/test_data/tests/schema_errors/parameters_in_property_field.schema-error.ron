@@ -1,4 +1,0 @@
-PropertyFieldWithParameters("Base", "field", "String", [
-  "firstParam",
-  "secondParam",
-])

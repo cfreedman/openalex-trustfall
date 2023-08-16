@@ -268,7 +268,7 @@ impl OpenAlexAdapter {
         ) {
             Ok(vertex) => Box::new(std::iter::once(vertex)),
             Err(e) => {
-                eprintln!("API error when fetching or deserializing {url}");
+                eprintln!("API error when fetching or deserializing {url}: {e}");
                 Box::new(std::iter::empty())
             }
         }
@@ -302,7 +302,7 @@ impl OpenAlexAdapter {
         ) {
             Ok(vertex) => Box::new(std::iter::once(vertex)),
             Err(e) => {
-                eprintln!("API error when fetching or deserializing {random_url}");
+                eprintln!("API error when fetching or deserializing {random_url}: {e}");
                 Box::new(std::iter::empty())
             }
         }
@@ -577,7 +577,7 @@ impl Adapter<'static> for OpenAlexAdapter {
                                 }
                                 Err(e) => {
                                     eprintln!(
-                        "API error while fetching or deserializing {institution_id}"
+                        "API error while fetching or deserializing {institution_id}: {e}"
                     );
                                     Box::new(std::iter::empty())
                                 }

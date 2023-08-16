@@ -1,8 +1,0 @@
-Err(MultipleOutputsWithSameName(DuplicatedNamesConflict(
-  duplicates: {
-    "primeFactorcount": [
-      ("primeFactor", "@fold.count"),
-      ("primeFactor", "@fold.count"),
-    ],
-  },
-)))

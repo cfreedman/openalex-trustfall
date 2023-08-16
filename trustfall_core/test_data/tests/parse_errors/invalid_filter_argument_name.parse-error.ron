@@ -1,4 +1,0 @@
-Err(OtherError("Filter argument names must only contain ASCII alphanumerics or underscore characters: containsåäö", Pos(
-  line: 4,
-  column: 58,
-)))

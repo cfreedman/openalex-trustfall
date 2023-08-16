@@ -1,6 +1,0 @@
-Err(InvalidOutputName("name with spaces", [
-  ' ',
-], Pos(
-  line: 4,
-  column: 28,
-)))

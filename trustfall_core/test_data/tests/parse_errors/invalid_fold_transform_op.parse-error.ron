@@ -1,4 +1,0 @@
-Err(UnsupportedTransformOperator("non_existent", Pos(
-  line: 4,
-  column: 47,
-)))
