@@ -102,11 +102,11 @@ impl Vertex {
 pub struct OpenAlexObject {
     pub cited_by_count: u32,
     pub counts_by_year: Vec<YearCount>,
-    pub created_data: String,
+    pub created_date: String,
     pub display_name: String,
     pub id: String,
-    pub ids: Vec<String>,
-    pub updated_data: String,
+    pub ids: Vec<String>, // Fix
+    pub updated_date: String,
 }
 // OpenAlexWork structs
 #[derive(Clone, Debug, Deserialize)]
@@ -152,10 +152,10 @@ pub struct Authorship {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Payment {
-    pub price: u32,
+    pub value: u32,
     pub currency: String,
     pub provenance: String,
-    pub price_usd: u32,
+    pub value_usd: u32,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -220,9 +220,9 @@ pub struct Author {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct SummaryStats {
-    two_year_mean_citedness: f64,
-    h_index: u32,
-    i10_index: u32,
+    pub two_year_mean_citedness: f64,
+    pub h_index: u32,
+    pub i10_index: u32,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -254,7 +254,7 @@ pub struct DehydratedConcept {
     pub wikidata: String,
     pub display_name: String,
     pub level: u16,
-    pub score: f64,
+    pub score: f64, // Fix
 }
 
 // Source structs
@@ -295,6 +295,7 @@ pub struct Society {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct DehydratedSource {
+    // Fix
     pub id: String,
     pub display_name: String,
     pub issn_l: String,
@@ -323,6 +324,7 @@ pub struct Institution {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct DehydratedInstitution {
+    // Fix
     pub id: String,
     pub display_name: String,
     pub ror: String,

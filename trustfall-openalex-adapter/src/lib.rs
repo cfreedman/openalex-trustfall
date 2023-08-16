@@ -1,4 +1,4 @@
 mod adapter;
-mod vertex;
 mod fetch;
-pub use adapter::AlexAdapter;
+mod vertex;
+pub use adapter::OpenAlexAdapter;

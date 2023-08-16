@@ -11,12 +11,12 @@ directive @tag(
     """Name to apply to the given property field."""
     name: String
 ) on FIELD
-directive @output (
+directive @output(
     """What to designate the output field generated from this property field."""
     name: String
 ) on FIELD
 directive @optional on FIELD
-directive @recursive(
+directive @recurse(
     """
     Recurse up to this many times on this edge. A depth of 1 produces the current
     vertex and its immediate neighbors along the given edge.
@@ -24,10 +24,273 @@ directive @recursive(
     depth: Int!
 ) on FIELD
 directive @fold on FIELD
-directive @transform (
+directive @transform(
     """
     Name of the transformation operation to perform.
     """
     op: String!
 ) on FIELD
 
+type OpenAlexObject {
+    cited_by_count: Int,
+    counts_by_year: [YearCount],
+    created_data: String,
+    display_name: String,
+    id: String,
+    ids: [String],
+    updated_data: String,
+}
+
+type Work {
+    object: OpenAlexObject,
+    abstract_text: String,
+    authorships: [Authorship],
+    apc_payment: Payment,
+    best_oa_location: Location,
+    biblio: Biblio,
+    cited_by_api_url: String,
+    concepts: [DehydratedConcept],
+    corresponding_author_ids: [String],
+    corresponding_institution_ids: [String],
+    doi: String,
+    grants: [Grant],
+    is_paratext: Boolean,
+    is_retracted: Boolean,
+    language: String,
+    locations: [Location],
+    mesh: [Mesh],
+    ngrams_url: String,
+    open_access: OpenAccess,
+    primary_location: Location,
+    publication_date: String,
+    publication_year: Int,
+    referenced_works: [String],
+    related_works: [String],
+    title: String,
+    ttype: String,
+    is_oa: Boolean,
+    license: String,
+    url: String,
+    version: String,
+}
+
+type Authorship {
+    author_position: String,
+    author: DehydratedAuthor,
+    institutions: [DehydratedInstitution],
+}
+
+type Payment {
+    price: Int,
+    currency: String,
+    provenance: String,
+    price_usd: Int,
+}
+
+type Biblio {
+    volume: String,
+    issue: String,
+    first_page: String,
+    last_page: String,
+}
+
+type YearCount {
+    year: Int,
+    cited_by_count: Int,
+}
+
+type Grant {
+    funder: String,
+    funder_display_name: String,
+    award_id: String,
+}
+
+type Location {
+    is_oa: Boolean,
+    landing_page_url: String,
+    license: String,
+    source: DehydratedSource,
+    pdf_url: String,
+    version: String,
+}
+
+type Mesh {
+    descriptor_ui: String,
+    descriptor_name: String,
+    qualifier_ui: String,
+    qualifier_name: String,
+    is_major_topic: Boolean,
+}
+
+type OpenAccess {
+    is_oa: Boolean,
+    oa_status: String,
+    oa_url: String,
+    any_repository_has_fulltext: Boolean,
+}
+
+# OpenAlexAuthor types
+
+type Author {
+    object: OpenAlexObject,
+    display_name_alternatives: [String],
+    last_known_institution: DehydratedInstitution,
+    orcid: String,
+    summary_stats: SummaryStats,
+    works_api_url: String,
+    works_count: Int,
+}
+
+type SummaryStats {
+    two_year_mean_citedness: Float,
+    h_index: Int,
+    i10_index: Int,
+}
+
+type DehydratedAuthor {
+    id: String,
+    display_name: String,
+    orcid: String,
+}
+
+# Concept types
+
+type Concept {
+    ancestors: [DehydratedConcept],
+    object: OpenAlexObject,
+    description: String,
+    image_thumbnail_url: String,
+    image_url: String,
+    level: Int,
+    related_concepts: [DehydratedConcept],
+    summary_stats: SummaryStats,
+    wikidata: String,
+    works_api_url: String,
+    works_count: Int,
+}
+
+type DehydratedConcept {
+    id: String,
+    wikidata: String,
+    display_name: String,
+    level: Int,
+    score: f64,
+}
+
+# Source types
+
+type Source {
+    object: OpenAlexObject,
+    abreviated_title: String,
+    alternative_titles: [String],
+    apc_payment: [Price],
+    apc_usd: Int,
+    country_code: String,
+    homepage_url: String,
+    host_organization: String,
+    host_organization_lineage: [String],
+    host_organization_name: String,
+    is_in_doaj: Boolean,
+    is_oa: Boolean,
+    issn: [String],
+    issn_l: String,
+    societies: [Society],
+    summary_stats: SummaryStats,
+    ttype: String,
+    works_api_url: String,
+    works_count: Int,
+}
+
+type Price {
+    price: Int,
+    currency: String,
+}
+
+type Society {
+    url: String,
+    organization: String,
+}
+
+type DehydratedSource {
+    id: String,
+    display_name: String,
+    issn_l: String,
+    issn: [String],
+    host_organization: String,
+    ttype: String,
+}
+
+# Institution types
+
+type Institution {
+    object: OpenAlexObject,
+    associated_institutions: [DehydratedInstitution],
+    display_name_alternatives: [String],
+    country_code: String,
+    geo: Geo,
+    homepage_url: String,
+    repositories: [DehydratedSource],
+    roles: [Role],
+    ror: String,
+    summary_stats: SummaryStats,
+    ttype: String,
+    works_api_url: String,
+    works_count: Int,
+}
+
+type DehydratedInstitution {
+    id: String,
+    display_name: String,
+    ror: String,
+    country_code: String,
+    ttype: String,
+}
+
+type Role {
+    role: String,
+    id: String,
+    works_count: Int,
+}
+
+type Geo {
+    city: String,
+    geonames_city_id: String,
+    region: String,
+    country_code: String,
+    country: String,
+    latitude: Float,
+    longitude: Float,
+}
+
+# Publisher types
+
+type Publisher {
+    object: OpenAlexObject,
+    alternative_titles: [String],
+    country_codes: [String],
+    hierarchy_level: Int,
+    image_thumbnail_url: String,
+    image_url: String,
+    lineage: [String],
+    parent_publisher: String,
+    roles: [Role],
+    sources_api_url: String,
+    summary_stats: SummaryStats,
+    works_count: Int,
+}
+
+# Funder types
+
+type Funder {
+    object: OpenAlexObject,
+    alternative_titles: [String],
+    country_code: String,
+    description: String,
+    grants_count: Int,
+    homepage_url: String,
+    image_thumbnail_url: String,
+    image_url: String,
+    roles: [Role],
+    summary_stats: SummaryStats,
+    works_count: Int,
+}

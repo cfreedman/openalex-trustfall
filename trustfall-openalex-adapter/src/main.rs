@@ -1,5 +1,5 @@
-use openalex_adapter::AlexAdapter;
+use openalex_adapter::OpenAlexAdapter;
 
-fn main(){
+fn main() {
     todo! {"Stuff"};
 }
