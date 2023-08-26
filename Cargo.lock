@@ -37,9 +37,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.70"
+version = "1.0.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7de8ce5e0f9f8d88245311066a578d72b7af3e7088f32783804676302df237e4"
+checksum = "8c6f84b74db2535ebae81eede2f39b947dcbf01d093ae5f791e5dd414a1bf289"
 
 [[package]]
 name = "async-graphql-parser"
@@ -1502,12 +1502,14 @@ dependencies = [
  "lazy_static",
  "maplit",
  "octorust",
+ "once_cell",
  "regex",
  "reqwest 0.11.10",
  "ron",
  "serde",
  "serde_json",
  "tokio 1.27.0",
+ "trustfall",
  "trustfall_core",
  "yaml-rust",
 ]
@@ -2896,6 +2898,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "trustfall"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c5a5b0a24849741733d22afe23b2784dd06a9c1100edd43de0e814a9f391b0b"
+dependencies = [
+ "anyhow",
+ "trustfall_core",
+ "trustfall_derive",
+]
+
+[[package]]
 name = "trustfall_core"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2911,6 +2924,17 @@ dependencies = [
  "serde_json",
  "smallvec 1.10.0",
  "thiserror",
+]
+
+[[package]]
+name = "trustfall_derive"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fb14eb4f23b3b669d232a5c7d2b3d6c89ad9e15be1cbdd2c1e14d87d62569ec"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.14",
 ]
 
 [[package]]

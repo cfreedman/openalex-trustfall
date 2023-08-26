@@ -1,0 +1,11 @@
+InputQuery (
+    query: r#"
+{
+    OpenAlexRandomWork {
+        object {
+            cited_by_count: cited_by_count @output
+        }
+    }
+}"#,
+    args: {},
+)

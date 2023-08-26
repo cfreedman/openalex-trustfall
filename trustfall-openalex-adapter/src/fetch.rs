@@ -3,15 +3,30 @@ use crate::vertex::{
     Work,
 };
 use lazy_static::lazy_static;
-use reqwest::{blocking::Client, Error};
+use reqwest::{
+    blocking::Client,
+    header::{ACCEPT, HOST, USER_AGENT},
+    Error,
+};
 
 lazy_static! {
     static ref OPEN_ALEX_CLIENT: Client = Client::new();
 }
 
 pub fn fetch_vertex(url: String, kind: VertexKind) -> Result<Vertex, Error> {
-    let json_response = OPEN_ALEX_CLIENT.get(url).send()?;
-
+    let response = OPEN_ALEX_CLIENT
+        .get(url.clone())
+        .header(USER_AGENT, "curl/7.81.0")
+        .header(HOST, "api.openalex.org")
+        .header(ACCEPT, "*/*")
+        .send()?;
+    println!("{:?}", response.text());
+    let request = OPEN_ALEX_CLIENT
+        .get(url.clone())
+        .header(USER_AGENT, "curl/7.81.0")
+        .header(HOST, "api.openalex.org")
+        .header(ACCEPT, "*/*");
+    let json_response = request.send()?;
     match kind {
         VertexKind::Work => Ok(Vertex::Work(json_response.json::<Work>()?)),
         VertexKind::Author => Ok(Vertex::Author(json_response.json::<Author>()?)),

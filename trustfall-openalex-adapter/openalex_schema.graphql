@@ -31,7 +31,12 @@ directive @transform(
     op: String!
 ) on FIELD
 
-type OpenAlexObject {
+type RootSchemaQuery {
+    OpenAlexIDSearchWork: Work,
+    OpenAlexRandomWork: Work
+}
+
+interface OpenAlexObject {
     cited_by_count: Int,
     counts_by_year: [YearCount],
     created_data: String,
@@ -41,7 +46,7 @@ type OpenAlexObject {
     updated_data: String,
 }
 
-type Work {
+interface Work {
     object: OpenAlexObject,
     abstract_text: String,
     authorships: [Authorship],
@@ -174,7 +179,7 @@ type DehydratedConcept {
     wikidata: String,
     display_name: String,
     level: Int,
-    score: f64,
+    score: Float,
 }
 
 # Source types

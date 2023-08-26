@@ -20,24 +20,35 @@ fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => work.object.clone().created_date.into(),
         "display_name" => work.object.clone().display_name.into(),
         "id" => work.object.clone().id.into(),
-        "ids" => work.object.clone().ids.into(),
+        "ids_doi" => work.object.clone().ids.doi.into(),
+        "ids_mag" => work.object.clone().ids.mag.into(),
+        "ids_openalex" => work.object.clone().ids.openalex.into(),
+        "ids_pmid" => work.object.clone().ids.pmid.into(),
+        "ids_pmcid" => work.object.clone().ids.pmcid.into(),
         "updated_date" => work.object.clone().updated_date.into(),
-        "abstract_text" => work.abstract_text.clone().into(),
-        "apc_payment_value" => work.apc_payment.clone().value.into(),
-        "apc_payment_currency" => work.apc_payment.clone().currency.into(),
-        "apc_payment_provenance" => work.apc_payment.clone().provenance.into(),
-        "apc_payment_value_usd" => work.apc_payment.clone().value_usd.into(),
-        "best_oa_location_is_oa" => work.best_oa_location.clone().is_oa.into(),
-        "best_oa_location_landing_page_url" => {
-            work.best_oa_location.clone().landing_page_url.into()
-        }
-        "best_oa_location_license" => work.best_oa_location.clone().license.into(),
-        "best_oa_location_pdf_url" => work.best_oa_location.clone().pdf_url.into(),
-        "best_oa_location_version" => work.best_oa_location.clone().version.into(),
-        "biblio_volume" => work.biblio.clone().volume.into(),
-        "biblio_issue" => work.biblio.clone().issue.into(),
-        "biblio_first_page" => work.biblio.clone().first_page.into(),
-        "biblio_last_page" => work.biblio.clone().last_page.into(),
+        "abstract_text" => work.abstract_inverted_index?.clone().into(),
+        "apc_list_value" => work.apc_list.unwrap().clone().value.into(),
+        "apc_list_currency" => work.apc_list.unwrap().clone().currency.into(),
+        "apc_list_provenance" => work.apc_list.unwrap().clone().provenance.into(),
+        "apc_list_value_usd" => work.apc_list.unwrap().clone().value_usd.into(),
+        "apc_payment_value" => work.apc_paid.unwrap().clone().value.into(),
+        "apc_payment_currency" => work.apc_paid.unwrap().clone().currency.into(),
+        "apc_payment_provenance" => work.apc_paid.unwrap().clone().provenance.into(),
+        "apc_payment_value_usd" => work.apc_paid.unwrap().clone().value_usd.into(),
+        "best_oa_location_is_oa" => work.best_oa_location.unwrap().clone().is_oa.into(),
+        "best_oa_location_landing_page_url" => work
+            .best_oa_location
+            .unwrap()
+            .clone()
+            .landing_page_url
+            .into(),
+        "best_oa_location_license" => work.best_oa_location.clone().unwrap().license.into(),
+        "best_oa_location_pdf_url" => work.best_oa_location.clone().unwrap().pdf_url.into(),
+        "best_oa_location_version" => work.best_oa_location.clone().unwrap().version.into(),
+        "biblio_volume" => work.biblio.unwrap().clone().volume.into(),
+        "biblio_issue" => work.biblio.unwrap().clone().issue.into(),
+        "biblio_first_page" => work.biblio.unwrap().clone().first_page.into(),
+        "biblio_last_page" => work.biblio.unwrap().clone().last_page.into(),
         "doi" => work.doi.clone().into(),
         "is_paratext" => work.is_paratext.into(),
         "is_retracted" => work.is_retracted.into(),
@@ -67,7 +78,11 @@ fn get_author_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => author.object.clone().created_date.into(),
         "display_name" => author.object.clone().display_name.into(),
         "id" => author.object.clone().id.into(),
-        "ids" => author.object.clone().ids.into(),
+        "ids_doi" => author.object.clone().ids.doi.unwrap().into(),
+        "ids_mag" => author.object.clone().ids.mag.unwrap().into(),
+        "ids_openalex" => author.object.clone().ids.openalex.unwrap().into(),
+        "ids_pmid" => author.object.clone().ids.pmid.unwrap().into(),
+        "ids_pmcid" => author.object.clone().ids.pmcid.unwrap().into(),
         "updated_date" => author.object.clone().updated_date.into(),
         "display_name_alternatives" => author.display_name_alternatives.clone().into(),
         "orcid" => author.orcid.clone().into(),
@@ -88,7 +103,11 @@ fn get_source_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => source.object.clone().created_date.into(),
         "display_name" => source.object.clone().display_name.into(),
         "id" => source.object.clone().id.into(),
-        "ids" => source.object.clone().ids.into(),
+        "ids_doi" => source.object.clone().ids.doi.unwrap().into(),
+        "ids_mag" => source.object.clone().ids.mag.unwrap().into(),
+        "ids_openalex" => source.object.clone().ids.openalex.unwrap().into(),
+        "ids_pmid" => source.object.clone().ids.pmid.unwrap().into(),
+        "ids_pmcid" => source.object.clone().ids.pmcid.unwrap().into(),
         "updated_date" => source.object.clone().updated_date.into(),
         "abreviated_title" => source.abreviated_title.clone().into(),
         "alternative_titles" => source.alternative_titles.clone().into(),
@@ -133,7 +152,11 @@ fn get_concept_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => concept.object.clone().created_date.into(),
         "display_name" => concept.object.clone().display_name.into(),
         "id" => concept.object.clone().id.into(),
-        "ids" => concept.object.clone().ids.into(),
+        "ids_doi" => concept.object.clone().ids.doi.unwrap().into(),
+        "ids_mag" => concept.object.clone().ids.mag.unwrap().into(),
+        "ids_openalex" => concept.object.clone().ids.openalex.unwrap().into(),
+        "ids_pmid" => concept.object.clone().ids.pmid.unwrap().into(),
+        "ids_pmcid" => concept.object.clone().ids.pmcid.unwrap().into(),
         "updated_date" => concept.object.clone().updated_date.into(),
         "description" => concept.description.clone().into(),
         "image_thumbnail_url" => concept.image_thumbnail_url.clone().into(),
@@ -159,7 +182,11 @@ fn get_institution_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => institution.object.clone().created_date.into(),
         "display_name" => institution.object.clone().display_name.into(),
         "id" => institution.object.clone().id.into(),
-        "ids" => institution.object.clone().ids.into(),
+        "ids_doi" => institution.object.clone().ids.doi.unwrap().into(),
+        "ids_mag" => institution.object.clone().ids.mag.unwrap().into(),
+        "ids_openalex" => institution.object.clone().ids.openalex.unwrap().into(),
+        "ids_pmid" => institution.object.clone().ids.pmid.unwrap().into(),
+        "ids_pmcid" => institution.object.clone().ids.pmcid.unwrap().into(),
         "updated_date" => institution.object.clone().updated_date.into(),
         "country_codes" => institution.country_code.clone().into(),
         "display_name_alternatives" => institution.display_name_alternatives.clone().into(),
@@ -190,7 +217,11 @@ fn get_publisher_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => publisher.object.clone().created_date.into(),
         "display_name" => publisher.object.clone().display_name.into(),
         "id" => publisher.object.clone().id.into(),
-        "ids" => publisher.object.clone().ids.into(),
+        "ids_doi" => publisher.object.clone().ids.doi.unwrap().into(),
+        "ids_mag" => publisher.object.clone().ids.mag.unwrap().into(),
+        "ids_openalex" => publisher.object.clone().ids.openalex.unwrap().into(),
+        "ids_pmid" => publisher.object.clone().ids.pmid.unwrap().into(),
+        "ids_pmcid" => publisher.object.clone().ids.pmcid.unwrap().into(),
         "updated_date" => publisher.object.clone().updated_date.into(),
         "alternative_titles" => publisher.alternative_titles.clone().into(),
         "country_codes" => publisher.country_codes.clone().into(),
@@ -214,7 +245,11 @@ fn get_funder_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => funder.object.clone().created_date.into(),
         "display_name" => funder.object.clone().display_name.into(),
         "id" => funder.object.clone().id.into(),
-        "ids" => funder.object.clone().ids.into(),
+        "ids_doi" => funder.object.clone().ids.doi.unwrap().into(),
+        "ids_mag" => funder.object.clone().ids.mag.unwrap().into(),
+        "ids_openalex" => funder.object.clone().ids.openalex.unwrap().into(),
+        "ids_pmid" => funder.object.clone().ids.pmid.unwrap().into(),
+        "ids_pmcid" => funder.object.clone().ids.pmcid.unwrap().into(),
         "updated_date" => funder.object.clone().updated_date.into(),
         "alternative_titles" => funder.alternative_titles.clone().into(),
         "country_code" => funder.country_code.clone().into(),
@@ -277,13 +312,13 @@ impl OpenAlexAdapter {
     fn random(&self, vertex_kind: String) -> VertexIterator<'static, Vertex> {
         let random_url = "https://api.openalex.org/".to_owned()
             + match vertex_kind.as_str() {
-                "Work" => "work",
-                "Author" => "author",
-                "Source" => "source",
-                "Concept" => "concept",
-                "Institution" => "institution",
-                "Publisher" => "publisher",
-                "Funder" => "funder",
+                "Work" => "works",
+                "Author" => "authors",
+                "Source" => "sources",
+                "Concept" => "concepts",
+                "Institution" => "institutions",
+                "Publisher" => "publishers",
+                "Funder" => "funders",
                 _ => unreachable!("Not a valid vertex kind"),
             }
             + "/random";
@@ -319,25 +354,15 @@ impl Adapter<'static> for OpenAlexAdapter {
         _resolve_info: &ResolveInfo,
     ) -> VertexIterator<'static, Self::Vertex> {
         match edge_name.as_ref() {
-            "OpenAlexIDSearch" => self.search_id(
+            "OpenAlexIDSearchWork" => self.search_id(
                 parameters
                     .get("id")
                     .and_then(|v| v.as_str())
                     .unwrap()
                     .to_string(),
-                parameters
-                    .get("vertex_kind")
-                    .and_then(|v| v.as_str())
-                    .unwrap()
-                    .to_string(),
+                "Work".to_string(),
             ),
-            "OpenAlexRandom" => self.random(
-                parameters
-                    .get("vertex_kind")
-                    .and_then(|v| v.as_str())
-                    .unwrap()
-                    .to_string(),
-            ),
+            "OpenAlexRandomWork" => self.random("Work".to_string()),
             _ => unreachable!("todo"),
         }
     }
