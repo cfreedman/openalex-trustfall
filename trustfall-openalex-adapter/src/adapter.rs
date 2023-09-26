@@ -26,37 +26,89 @@ fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "ids_pmid" => work.object.clone().ids.pmid.into(),
         "ids_pmcid" => work.object.clone().ids.pmcid.into(),
         "updated_date" => work.object.clone().updated_date.into(),
-        "abstract_text" => work.abstract_inverted_index?.clone().into(),
-        "apc_list_value" => work.apc_list.unwrap().clone().value.into(),
-        "apc_list_currency" => work.apc_list.unwrap().clone().currency.into(),
-        "apc_list_provenance" => work.apc_list.unwrap().clone().provenance.into(),
-        "apc_list_value_usd" => work.apc_list.unwrap().clone().value_usd.into(),
-        "apc_payment_value" => work.apc_paid.unwrap().clone().value.into(),
-        "apc_payment_currency" => work.apc_paid.unwrap().clone().currency.into(),
-        "apc_payment_provenance" => work.apc_paid.unwrap().clone().provenance.into(),
-        "apc_payment_value_usd" => work.apc_paid.unwrap().clone().value_usd.into(),
-        "best_oa_location_is_oa" => work.best_oa_location.unwrap().clone().is_oa.into(),
+        "abstract_text" => work.abstract_inverted_index.clone().into(),
+        "apc_list_value" => work
+            .apc_list
+            .and_then(|payment| payment.clone().value)
+            .into(),
+        "apc_list_currency" => work
+            .apc_list
+            .and_then(|payment| payment.clone().currency)
+            .into(),
+        "apc_list_provenance" => work
+            .apc_list
+            .and_then(|payment| payment.clone().provenance)
+            .into(),
+        "apc_list_value_usd" => work
+            .apc_list
+            .and_then(|payment| payment.clone().value_usd)
+            .into(),
+        "apc_payment_value" => work
+            .apc_paid
+            .and_then(|payment| payment.clone().value)
+            .into(),
+        "apc_payment_currency" => work
+            .apc_paid
+            .and_then(|payment| payment.clone().currency)
+            .into(),
+        "apc_payment_provenance" => work
+            .apc_paid
+            .and_then(|payment| payment.clone().provenance)
+            .into(),
+        "apc_payment_value_usd" => work
+            .apc_paid
+            .and_then(|payment| payment.clone().value_usd)
+            .into(),
+        "best_oa_location_is_oa" => work
+            .best_oa_location
+            .and_then(|location| location.clone().is_oa)
+            .into(),
         "best_oa_location_landing_page_url" => work
             .best_oa_location
-            .unwrap()
-            .clone()
-            .landing_page_url
+            .and_then(|location| location.clone().landing_page_url)
             .into(),
-        "best_oa_location_license" => work.best_oa_location.clone().unwrap().license.into(),
-        "best_oa_location_pdf_url" => work.best_oa_location.clone().unwrap().pdf_url.into(),
-        "best_oa_location_version" => work.best_oa_location.clone().unwrap().version.into(),
-        "biblio_volume" => work.biblio.unwrap().clone().volume.into(),
-        "biblio_issue" => work.biblio.unwrap().clone().issue.into(),
-        "biblio_first_page" => work.biblio.unwrap().clone().first_page.into(),
-        "biblio_last_page" => work.biblio.unwrap().clone().last_page.into(),
+        "best_oa_location_license" => work
+            .best_oa_location
+            .and_then(|location| location.clone().license)
+            .into(),
+        "best_oa_location_pdf_url" => work
+            .best_oa_location
+            .and_then(|location| location.clone().pdf_url)
+            .into(),
+        "best_oa_location_version" => work
+            .best_oa_location
+            .and_then(|location| location.clone().version)
+            .into(),
+        "biblio_volume" => work.biblio.and_then(|biblio| biblio.clone().volume).into(),
+        "biblio_issue" => work.biblio.and_then(|biblio| biblio.clone().issue).into(),
+        "biblio_first_page" => work
+            .biblio
+            .and_then(|biblio| biblio.clone().first_page)
+            .into(),
+        "biblio_last_page" => work
+            .biblio
+            .and_then(|biblio| biblio.clone().last_page)
+            .into(),
         "doi" => work.doi.clone().into(),
         "is_paratext" => work.is_paratext.into(),
         "is_retracted" => work.is_retracted.into(),
         "language" => work.language.clone().into(),
-        "open_access_is_oa" => work.open_access.clone().is_oa.into(),
-        "open_access_oa_status" => work.open_access.clone().oa_status.into(),
-        "open_access_oa_url" => work.open_access.clone().oa_url.into(),
-        "open_access_fulltext" => work.open_access.clone().any_repository_has_fulltext.into(),
+        "open_access_is_oa" => work
+            .open_access
+            .and_then(|open_access| open_access.clone().is_oa)
+            .into(),
+        "open_access_oa_status" => work
+            .open_access
+            .and_then(|open_access| open_access.clone().oa_status)
+            .into(),
+        "open_access_oa_url" => work
+            .open_access
+            .and_then(|open_access| open_access.clone().oa_url)
+            .into(),
+        "open_access_fulltext" => work
+            .open_access
+            .and_then(|open_access| open_access.clone().any_repository_has_fulltext)
+            .into(),
         "publication_date" => work.publication_date.clone().into(),
         "publication_year" => work.publication_year.into(),
         "referenced_works" => work.referenced_works.clone().into(),
@@ -65,8 +117,6 @@ fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "ttype" => work.ttype.clone().into(),
         "is_oa" => work.is_oa.into(),
         "license" => work.license.clone().into(),
-        "url" => work.url.clone().into(),
-        "version" => work.version.clone().into(),
         _ => unreachable!("Work property {field_name}"),
     }
 }
@@ -78,19 +128,29 @@ fn get_author_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => author.object.clone().created_date.into(),
         "display_name" => author.object.clone().display_name.into(),
         "id" => author.object.clone().id.into(),
-        "ids_doi" => author.object.clone().ids.doi.unwrap().into(),
-        "ids_mag" => author.object.clone().ids.mag.unwrap().into(),
-        "ids_openalex" => author.object.clone().ids.openalex.unwrap().into(),
-        "ids_pmid" => author.object.clone().ids.pmid.unwrap().into(),
-        "ids_pmcid" => author.object.clone().ids.pmcid.unwrap().into(),
+        "ids_doi" => author.object.clone().ids.doi.into(),
+        "ids_mag" => author.object.clone().ids.mag.into(),
+        "ids_openalex" => author.object.clone().ids.openalex.into(),
+        "ids_pmid" => author.object.clone().ids.pmid.into(),
+        "ids_pmcid" => author.object.clone().ids.pmcid.into(),
         "updated_date" => author.object.clone().updated_date.into(),
         "display_name_alternatives" => author.display_name_alternatives.clone().into(),
         "orcid" => author.orcid.clone().into(),
-        "summary_stats_mean_citeness" => {
-            FieldValue::Float64(author.summary_stats.clone().two_year_mean_citedness)
-        }
-        "summary_stats_h_index" => author.summary_stats.clone().h_index.into(),
-        "summary_stats_i10_index" => author.summary_stats.clone().i10_index.into(),
+        "summary_stats_mean_citeness" => match author
+            .summary_stats
+            .and_then(|stats| stats.clone().two_year_mean_citedness)
+        {
+            Some(num) => FieldValue::Float64(num),
+            _ => FieldValue::Null,
+        },
+        "summary_stats_h_index" => author
+            .summary_stats
+            .and_then(|stats| stats.clone().h_index)
+            .into(),
+        "summary_stats_i10_index" => author
+            .summary_stats
+            .and_then(|stats| stats.clone().i10_index)
+            .into(),
         "works_count" => author.works_count.into(),
         _ => unreachable!("Author property {field_name}"),
     }
@@ -113,10 +173,15 @@ fn get_source_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "alternative_titles" => source.alternative_titles.clone().into(),
         "apc_payment" => source
             .apc_payment
-            .clone()
-            .into_iter()
-            .map(|price_obj| price_obj.price.to_string() + " - " + &price_obj.currency)
-            .collect::<Vec<String>>()
+            .and_then(|price_vec| {
+                Some(
+                    price_vec
+                        .clone()
+                        .into_iter()
+                        .map(|price_obj| price_obj.price.to_string() + " - " + &price_obj.currency)
+                        .collect::<Vec<String>>(),
+                )
+            })
             .into(),
         "apc_usd" => source.apc_usd.into(),
         "country_code" => source.country_code.clone().into(),
@@ -128,16 +193,31 @@ fn get_source_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "issn_l" => source.issn_l.clone().into(),
         "societies" => source
             .societies
-            .clone()
-            .into_iter()
-            .map(|society| society.url + " - " + &society.organization)
-            .collect::<Vec<String>>()
+            .and_then(|society_vec| {
+                Some(
+                    society_vec
+                        .clone()
+                        .into_iter()
+                        .map(|society| society.url + " - " + &society.organization)
+                        .collect::<Vec<String>>(),
+                )
+            })
             .into(),
-        "summary_stats_mean_citeness" => {
-            FieldValue::Float64(source.summary_stats.clone().two_year_mean_citedness)
-        }
-        "summary_stats_h_index" => source.summary_stats.clone().h_index.into(),
-        "summary_stats_i10_index" => source.summary_stats.clone().i10_index.into(),
+        "summary_stats_mean_citeness" => match source
+            .summary_stats
+            .and_then(|stats| stats.clone().two_year_mean_citedness)
+        {
+            Some(num) => FieldValue::Float64(num),
+            _ => FieldValue::Null,
+        },
+        "summary_stats_h_index" => source
+            .summary_stats
+            .and_then(|stats| stats.clone().h_index)
+            .into(),
+        "summary_stats_i10_index" => source
+            .summary_stats
+            .and_then(|stats| stats.clone().i10_index)
+            .into(),
         "ttype" => source.ttype.clone().into(),
         "works_api_url" => source.works_api_url.clone().into(),
         "works_count" => source.works_count.into(),
@@ -162,11 +242,21 @@ fn get_concept_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "image_thumbnail_url" => concept.image_thumbnail_url.clone().into(),
         "image_url" => concept.image_url.clone().into(),
         "level" => concept.level.into(),
-        "summary_stats_mean_citeness" => {
-            FieldValue::Float64(concept.summary_stats.clone().two_year_mean_citedness)
-        }
-        "summary_stats_h_index" => concept.summary_stats.clone().h_index.into(),
-        "summary_stats_i10_index" => concept.summary_stats.clone().i10_index.into(),
+        "summary_stats_mean_citeness" => match concept
+            .summary_stats
+            .and_then(|stats| stats.clone().two_year_mean_citedness)
+        {
+            Some(num) => FieldValue::Float64(num),
+            _ => FieldValue::Null,
+        },
+        "summary_stats_h_index" => concept
+            .summary_stats
+            .and_then(|stats| stats.clone().h_index)
+            .into(),
+        "summary_stats_i10_index" => concept
+            .summary_stats
+            .and_then(|stats| stats.clone().i10_index)
+            .into(),
         "wikidata" => concept.wikidata.clone().into(),
         "works_count" => concept.works_count.into(),
         _ => unreachable!("Concept property {field_name}"),
@@ -182,29 +272,45 @@ fn get_institution_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "created_date" => institution.object.clone().created_date.into(),
         "display_name" => institution.object.clone().display_name.into(),
         "id" => institution.object.clone().id.into(),
-        "ids_doi" => institution.object.clone().ids.doi.unwrap().into(),
-        "ids_mag" => institution.object.clone().ids.mag.unwrap().into(),
-        "ids_openalex" => institution.object.clone().ids.openalex.unwrap().into(),
-        "ids_pmid" => institution.object.clone().ids.pmid.unwrap().into(),
-        "ids_pmcid" => institution.object.clone().ids.pmcid.unwrap().into(),
+        "ids_doi" => institution.object.clone().ids.doi.into(),
+        "ids_mag" => institution.object.clone().ids.mag.into(),
+        "ids_openalex" => institution.object.clone().ids.openalex.into(),
+        "ids_pmid" => institution.object.clone().ids.pmid.into(),
+        "ids_pmcid" => institution.object.clone().ids.pmcid.into(),
         "updated_date" => institution.object.clone().updated_date.into(),
         "country_codes" => institution.country_code.clone().into(),
         "display_name_alternatives" => institution.display_name_alternatives.clone().into(),
-        "geo_city" => institution.geo.clone().city.into(),
-        "geo_geonames_city_id" => institution.geo.clone().geonames_city_id.into(),
-        "geo_region" => institution.geo.clone().region.into(),
-        "geo_country_code" => institution.geo.clone().country_code.into(),
-        "geo_country" => institution.geo.clone().country.into(),
-        "geo_latitude" => institution.geo.clone().latitude.into(),
-        "geo_longitude" => institution.geo.clone().longitude.into(),
+        "geo_city" => institution.geo.and_then(|geo| geo.clone().city).into(),
+        "geo_geonames_city_id" => institution
+            .geo
+            .and_then(|geo| geo.clone().geonames_city_id)
+            .into(),
+        "geo_region" => institution.geo.and_then(|geo| geo.clone().region).into(),
+        "geo_country_code" => institution
+            .geo
+            .and_then(|geo| geo.clone().country_code)
+            .into(),
+        "geo_country" => institution.geo.and_then(|geo| geo.clone().country).into(),
+        "geo_latitude" => institution.geo.and_then(|geo| geo.clone().latitude).into(),
+        "geo_longitude" => institution.geo.and_then(|geo| geo.clone().longitude).into(),
         "homepage_url" => institution.homepage_url.clone().into(),
         "ror" => institution.ror.clone().into(),
         "ttype" => institution.ttype.clone().into(),
-        "summary_stats_mean_citeness" => {
-            FieldValue::Float64(institution.summary_stats.clone().two_year_mean_citedness)
-        }
-        "summary_stats_h_index" => institution.summary_stats.clone().h_index.into(),
-        "summary_stats_i10_index" => institution.summary_stats.clone().i10_index.into(),
+        "summary_stats_mean_citeness" => match institution
+            .summary_stats
+            .and_then(|stats| stats.clone().two_year_mean_citedness)
+        {
+            Some(num) => FieldValue::Float64(num),
+            _ => FieldValue::Null,
+        },
+        "summary_stats_h_index" => institution
+            .summary_stats
+            .and_then(|stats| stats.clone().h_index)
+            .into(),
+        "summary_stats_i10_index" => institution
+            .summary_stats
+            .and_then(|stats| stats.clone().i10_index)
+            .into(),
         "works_count" => institution.works_count.into(),
         _ => unreachable!("Institution property {field_name}"),
     }
@@ -228,11 +334,21 @@ fn get_publisher_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "hierarchy_level" => publisher.hierarchy_level.into(),
         "image_thumbnail_url" => publisher.image_thumbnail_url.clone().into(),
         "image_url" => publisher.image_url.clone().into(),
-        "summary_stats_mean_citeness" => {
-            FieldValue::Float64(publisher.summary_stats.clone().two_year_mean_citedness)
-        }
-        "summary_stats_h_index" => publisher.summary_stats.clone().h_index.into(),
-        "summary_stats_i10_index" => publisher.summary_stats.clone().i10_index.into(),
+        "summary_stats_mean_citeness" => match publisher
+            .summary_stats
+            .and_then(|stats| stats.clone().two_year_mean_citedness)
+        {
+            Some(num) => FieldValue::Float64(num),
+            _ => FieldValue::Null,
+        },
+        "summary_stats_h_index" => publisher
+            .summary_stats
+            .and_then(|stats| stats.clone().h_index)
+            .into(),
+        "summary_stats_i10_index" => publisher
+            .summary_stats
+            .and_then(|stats| stats.clone().i10_index)
+            .into(),
         "works_count" => publisher.works_count.into(),
         _ => unreachable!("Publisher property {field_name}"),
     }
@@ -258,11 +374,21 @@ fn get_funder_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "homepage_url" => funder.homepage_url.clone().into(),
         "image_thumbnail_url" => funder.image_thumbnail_url.clone().into(),
         "image_url" => funder.image_url.clone().into(),
-        "summary_stats_mean_citeness" => {
-            FieldValue::Float64(funder.summary_stats.clone().two_year_mean_citedness)
-        }
-        "summary_stats_h_index" => funder.summary_stats.clone().h_index.into(),
-        "summary_stats_i10_index" => funder.summary_stats.clone().i10_index.into(),
+        "summary_stats_mean_citeness" => match funder
+            .summary_stats
+            .and_then(|stats| stats.clone().two_year_mean_citedness)
+        {
+            Some(num) => FieldValue::Float64(num),
+            _ => FieldValue::Null,
+        },
+        "summary_stats_h_index" => funder
+            .summary_stats
+            .and_then(|stats| stats.clone().h_index)
+            .into(),
+        "summary_stats_i10_index" => funder
+            .summary_stats
+            .and_then(|stats| stats.clone().i10_index)
+            .into(),
         "works_count" => funder.works_count.into(),
         _ => unreachable!("Funder property {field_name}"),
     }
