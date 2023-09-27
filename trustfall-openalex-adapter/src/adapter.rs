@@ -29,65 +29,80 @@ fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "abstract_text" => work.abstract_inverted_index.clone().into(),
         "apc_list_value" => work
             .apc_list
-            .and_then(|payment| payment.clone().value)
+            .clone()
+            .and_then(|payment| payment.value)
             .into(),
         "apc_list_currency" => work
             .apc_list
-            .and_then(|payment| payment.clone().currency)
+            .clone()
+            .and_then(|payment| payment.currency)
             .into(),
         "apc_list_provenance" => work
             .apc_list
-            .and_then(|payment| payment.clone().provenance)
+            .clone()
+            .and_then(|payment| payment.provenance)
             .into(),
         "apc_list_value_usd" => work
             .apc_list
-            .and_then(|payment| payment.clone().value_usd)
+            .clone()
+            .and_then(|payment| payment.value_usd)
             .into(),
         "apc_payment_value" => work
             .apc_paid
-            .and_then(|payment| payment.clone().value)
+            .clone()
+            .and_then(|payment| payment.value)
             .into(),
         "apc_payment_currency" => work
             .apc_paid
-            .and_then(|payment| payment.clone().currency)
+            .clone()
+            .and_then(|payment| payment.currency)
             .into(),
         "apc_payment_provenance" => work
             .apc_paid
-            .and_then(|payment| payment.clone().provenance)
+            .clone()
+            .and_then(|payment| payment.provenance)
             .into(),
         "apc_payment_value_usd" => work
             .apc_paid
-            .and_then(|payment| payment.clone().value_usd)
+            .clone()
+            .and_then(|payment| payment.value_usd)
             .into(),
         "best_oa_location_is_oa" => work
             .best_oa_location
-            .and_then(|location| location.clone().is_oa)
+            .clone()
+            .and_then(|location| location.is_oa)
             .into(),
         "best_oa_location_landing_page_url" => work
             .best_oa_location
-            .and_then(|location| location.clone().landing_page_url)
+            .clone()
+            .and_then(|location| location.landing_page_url)
             .into(),
         "best_oa_location_license" => work
             .best_oa_location
-            .and_then(|location| location.clone().license)
+            .clone()
+            .and_then(|location| location.license)
             .into(),
         "best_oa_location_pdf_url" => work
             .best_oa_location
-            .and_then(|location| location.clone().pdf_url)
+            .clone()
+            .and_then(|location| location.pdf_url)
             .into(),
         "best_oa_location_version" => work
             .best_oa_location
-            .and_then(|location| location.clone().version)
+            .clone()
+            .and_then(|location| location.version)
             .into(),
-        "biblio_volume" => work.biblio.and_then(|biblio| biblio.clone().volume).into(),
-        "biblio_issue" => work.biblio.and_then(|biblio| biblio.clone().issue).into(),
+        "biblio_volume" => work.biblio.clone().and_then(|biblio| biblio.volume).into(),
+        "biblio_issue" => work.biblio.clone().and_then(|biblio| biblio.issue).into(),
         "biblio_first_page" => work
             .biblio
-            .and_then(|biblio| biblio.clone().first_page)
+            .clone()
+            .and_then(|biblio| biblio.first_page)
             .into(),
         "biblio_last_page" => work
             .biblio
-            .and_then(|biblio| biblio.clone().last_page)
+            .clone()
+            .and_then(|biblio| biblio.last_page)
             .into(),
         "doi" => work.doi.clone().into(),
         "is_paratext" => work.is_paratext.into(),
@@ -95,19 +110,23 @@ fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "language" => work.language.clone().into(),
         "open_access_is_oa" => work
             .open_access
-            .and_then(|open_access| open_access.clone().is_oa)
+            .clone()
+            .and_then(|open_access| open_access.is_oa)
             .into(),
         "open_access_oa_status" => work
             .open_access
-            .and_then(|open_access| open_access.clone().oa_status)
+            .clone()
+            .and_then(|open_access| open_access.oa_status)
             .into(),
         "open_access_oa_url" => work
             .open_access
-            .and_then(|open_access| open_access.clone().oa_url)
+            .clone()
+            .and_then(|open_access| open_access.oa_url)
             .into(),
         "open_access_fulltext" => work
             .open_access
-            .and_then(|open_access| open_access.clone().any_repository_has_fulltext)
+            .clone()
+            .and_then(|open_access| open_access.any_repository_has_fulltext)
             .into(),
         "publication_date" => work.publication_date.clone().into(),
         "publication_year" => work.publication_year.into(),
@@ -138,18 +157,21 @@ fn get_author_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "orcid" => author.orcid.clone().into(),
         "summary_stats_mean_citeness" => match author
             .summary_stats
-            .and_then(|stats| stats.clone().two_year_mean_citedness)
+            .clone()
+            .and_then(|stats| stats.two_year_mean_citedness)
         {
             Some(num) => FieldValue::Float64(num),
             _ => FieldValue::Null,
         },
         "summary_stats_h_index" => author
             .summary_stats
-            .and_then(|stats| stats.clone().h_index)
+            .clone()
+            .and_then(|stats| stats.h_index)
             .into(),
         "summary_stats_i10_index" => author
             .summary_stats
-            .and_then(|stats| stats.clone().i10_index)
+            .clone()
+            .and_then(|stats| stats.i10_index)
             .into(),
         "works_count" => author.works_count.into(),
         _ => unreachable!("Author property {field_name}"),
@@ -173,15 +195,10 @@ fn get_source_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "alternative_titles" => source.alternative_titles.clone().into(),
         "apc_payment" => source
             .apc_payment
-            .and_then(|price_vec| {
-                Some(
-                    price_vec
-                        .clone()
-                        .into_iter()
-                        .map(|price_obj| price_obj.price.to_string() + " - " + &price_obj.currency)
-                        .collect::<Vec<String>>(),
-                )
-            })
+            .clone()
+            .into_iter()
+            .map(|price_obj| price_obj.price.to_string() + " - " + &price_obj.currency)
+            .collect::<Vec<String>>()
             .into(),
         "apc_usd" => source.apc_usd.into(),
         "country_code" => source.country_code.clone().into(),
@@ -193,30 +210,28 @@ fn get_source_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "issn_l" => source.issn_l.clone().into(),
         "societies" => source
             .societies
-            .and_then(|society_vec| {
-                Some(
-                    society_vec
-                        .clone()
-                        .into_iter()
-                        .map(|society| society.url + " - " + &society.organization)
-                        .collect::<Vec<String>>(),
-                )
-            })
+            .clone()
+            .into_iter()
+            .map(|society| society.url + " - " + &society.organization)
+            .collect::<Vec<String>>()
             .into(),
         "summary_stats_mean_citeness" => match source
             .summary_stats
-            .and_then(|stats| stats.clone().two_year_mean_citedness)
+            .clone()
+            .and_then(|stats| stats.two_year_mean_citedness)
         {
             Some(num) => FieldValue::Float64(num),
             _ => FieldValue::Null,
         },
         "summary_stats_h_index" => source
             .summary_stats
-            .and_then(|stats| stats.clone().h_index)
+            .clone()
+            .and_then(|stats| stats.h_index)
             .into(),
         "summary_stats_i10_index" => source
             .summary_stats
-            .and_then(|stats| stats.clone().i10_index)
+            .clone()
+            .and_then(|stats| stats.i10_index)
             .into(),
         "ttype" => source.ttype.clone().into(),
         "works_api_url" => source.works_api_url.clone().into(),
@@ -244,18 +259,21 @@ fn get_concept_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "level" => concept.level.into(),
         "summary_stats_mean_citeness" => match concept
             .summary_stats
-            .and_then(|stats| stats.clone().two_year_mean_citedness)
+            .clone()
+            .and_then(|stats| stats.two_year_mean_citedness)
         {
             Some(num) => FieldValue::Float64(num),
             _ => FieldValue::Null,
         },
         "summary_stats_h_index" => concept
             .summary_stats
-            .and_then(|stats| stats.clone().h_index)
+            .clone()
+            .and_then(|stats| stats.h_index)
             .into(),
         "summary_stats_i10_index" => concept
             .summary_stats
-            .and_then(|stats| stats.clone().i10_index)
+            .clone()
+            .and_then(|stats| stats.i10_index)
             .into(),
         "wikidata" => concept.wikidata.clone().into(),
         "works_count" => concept.works_count.into(),
@@ -280,36 +298,41 @@ fn get_institution_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "updated_date" => institution.object.clone().updated_date.into(),
         "country_codes" => institution.country_code.clone().into(),
         "display_name_alternatives" => institution.display_name_alternatives.clone().into(),
-        "geo_city" => institution.geo.and_then(|geo| geo.clone().city).into(),
+        "geo_city" => institution.geo.clone().and_then(|geo| geo.city).into(),
         "geo_geonames_city_id" => institution
             .geo
+            .clone()
             .and_then(|geo| geo.clone().geonames_city_id)
             .into(),
-        "geo_region" => institution.geo.and_then(|geo| geo.clone().region).into(),
+        "geo_region" => institution.geo.clone().and_then(|geo| geo.region).into(),
         "geo_country_code" => institution
             .geo
-            .and_then(|geo| geo.clone().country_code)
+            .clone()
+            .and_then(|geo| geo.country_code)
             .into(),
-        "geo_country" => institution.geo.and_then(|geo| geo.clone().country).into(),
-        "geo_latitude" => institution.geo.and_then(|geo| geo.clone().latitude).into(),
-        "geo_longitude" => institution.geo.and_then(|geo| geo.clone().longitude).into(),
+        "geo_country" => institution.geo.clone().and_then(|geo| geo.country).into(),
+        "geo_latitude" => institution.geo.clone().and_then(|geo| geo.latitude).into(),
+        "geo_longitude" => institution.geo.clone().and_then(|geo| geo.longitude).into(),
         "homepage_url" => institution.homepage_url.clone().into(),
         "ror" => institution.ror.clone().into(),
         "ttype" => institution.ttype.clone().into(),
         "summary_stats_mean_citeness" => match institution
             .summary_stats
-            .and_then(|stats| stats.clone().two_year_mean_citedness)
+            .clone()
+            .and_then(|stats| stats.two_year_mean_citedness)
         {
             Some(num) => FieldValue::Float64(num),
             _ => FieldValue::Null,
         },
         "summary_stats_h_index" => institution
             .summary_stats
-            .and_then(|stats| stats.clone().h_index)
+            .clone()
+            .and_then(|stats| stats.h_index)
             .into(),
         "summary_stats_i10_index" => institution
             .summary_stats
-            .and_then(|stats| stats.clone().i10_index)
+            .clone()
+            .and_then(|stats| stats.i10_index)
             .into(),
         "works_count" => institution.works_count.into(),
         _ => unreachable!("Institution property {field_name}"),
@@ -336,18 +359,21 @@ fn get_publisher_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "image_url" => publisher.image_url.clone().into(),
         "summary_stats_mean_citeness" => match publisher
             .summary_stats
-            .and_then(|stats| stats.clone().two_year_mean_citedness)
+            .clone()
+            .and_then(|stats| stats.two_year_mean_citedness)
         {
             Some(num) => FieldValue::Float64(num),
             _ => FieldValue::Null,
         },
         "summary_stats_h_index" => publisher
             .summary_stats
-            .and_then(|stats| stats.clone().h_index)
+            .clone()
+            .and_then(|stats| stats.h_index)
             .into(),
         "summary_stats_i10_index" => publisher
             .summary_stats
-            .and_then(|stats| stats.clone().i10_index)
+            .clone()
+            .and_then(|stats| stats.i10_index)
             .into(),
         "works_count" => publisher.works_count.into(),
         _ => unreachable!("Publisher property {field_name}"),
@@ -376,18 +402,21 @@ fn get_funder_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         "image_url" => funder.image_url.clone().into(),
         "summary_stats_mean_citeness" => match funder
             .summary_stats
-            .and_then(|stats| stats.clone().two_year_mean_citedness)
+            .clone()
+            .and_then(|stats| stats.two_year_mean_citedness)
         {
             Some(num) => FieldValue::Float64(num),
             _ => FieldValue::Null,
         },
         "summary_stats_h_index" => funder
             .summary_stats
-            .and_then(|stats| stats.clone().h_index)
+            .clone()
+            .and_then(|stats| stats.h_index)
             .into(),
         "summary_stats_i10_index" => funder
             .summary_stats
-            .and_then(|stats| stats.clone().i10_index)
+            .clone()
+            .and_then(|stats| stats.i10_index)
             .into(),
         "works_count" => funder.works_count.into(),
         _ => unreachable!("Funder property {field_name}"),
@@ -720,18 +749,23 @@ impl Adapter<'static> for OpenAlexAdapter {
                         None => Box::new(std::iter::empty()),
                         Some(vertex) => {
                             let author = vertex.as_author().expect("vertex was not a work");
-                            let institution_id = &author.last_known_institution.id;
+                            match &author.last_known_institution {
+                                Some(institution) => {
+                                    let institution_id = institution.id.clone();
 
-                            match fetch_vertex(institution_id.clone(), VertexKind::Institution) {
-                                Ok(institution_vertex) => {
-                                    Box::new(std::iter::once(institution_vertex))
+                                    match fetch_vertex(institution_id.clone(), VertexKind::Institution) {
+                                        Ok(institution_vertex) => {
+                                            Box::new(std::iter::once(institution_vertex))
+                                        }
+                                        Err(e) => {
+                                            eprintln!(
+                                                "API error while fetching or deserializing {institution_id}: {e}"
+                                            );
+                                            Box::new(std::iter::empty())
+                                        }
+                                    }
                                 }
-                                Err(e) => {
-                                    eprintln!(
-                        "API error while fetching or deserializing {institution_id}: {e}"
-                    );
-                                    Box::new(std::iter::empty())
-                                }
+                                _ => Box::new(std::iter::empty())
                             }
                         }
                     };
@@ -770,18 +804,21 @@ impl Adapter<'static> for OpenAlexAdapter {
                         None => Box::new(std::iter::empty()),
                         Some(vertex) => {
                             let source = vertex.as_source().expect("vertex was not a work");
-                            let host_id = &source.host_organization;
-
-                            match fetch_vertex(host_id.clone(), VertexKind::Institution) {
-                                Ok(institution_vertex) => {
-                                    Box::new(std::iter::once(institution_vertex))
+                            match &source.host_organization {
+                                Some(host_id) => {
+                                    match fetch_vertex(host_id.clone(), VertexKind::Institution) {
+                                        Ok(institution_vertex) => {
+                                            Box::new(std::iter::once(institution_vertex))
+                                        }
+                                        Err(e) => {
+                                            eprintln!(
+                                                "API error while fetching or deserializing {host_id}: {e}"
+                                            );
+                                            Box::new(std::iter::empty())
+                                        }
+                                    }
                                 }
-                                Err(e) => {
-                                    eprintln!(
-                                        "API error while fetching or deserializing {host_id}: {e}"
-                                    );
-                                    Box::new(std::iter::empty())
-                                }
+                                _ => Box::new(std::iter::empty())
                             }
                         }
                     };
@@ -803,8 +840,8 @@ impl Adapter<'static> for OpenAlexAdapter {
                                         Ok(institution_vertex) => Some(institution_vertex),
                                         Err(e) => {
                                             eprintln!(
-                            "API error while fetching or deserializing {host_id}: {e}"
-                        );
+                                                "API error while fetching or deserializing {host_id}: {e}"
+                                            );
                                             None
                                         }
                                     }
@@ -886,8 +923,8 @@ impl Adapter<'static> for OpenAlexAdapter {
                                             Ok(concept_vertex) => Some(concept_vertex),
                                             Err(e) => {
                                                 eprintln!(
-                            "API error while fetching or deserializing {related_id}: {e}"
-                        );
+                                                    "API error while fetching or deserializing {related_id}: {e}"
+                                                );
                                                 None
                                             }
                                         }
@@ -946,8 +983,8 @@ impl Adapter<'static> for OpenAlexAdapter {
                                         Ok(institution_vertex) => Some(institution_vertex),
                                         Err(e) => {
                                             eprintln!(
-                        "API error while fetching or deserializing {institution_id}: {e}"
-                      );
+                                                "API error while fetching or deserializing {institution_id}: {e}"
+                                            );
                                             None
                                         }
                                     }
