@@ -33,50 +33,60 @@ directive @transform(
 
 type RootSchemaQuery {
     OpenAlexIDSearchWork: Work,
-    OpenAlexRandomWork: Work
-}
-
-interface OpenAlexObject {
-    cited_by_count: Int,
-    counts_by_year: [YearCount],
-    created_data: String,
-    display_name: String,
-    id: String,
-    ids: [String],
-    updated_data: String,
+    OpenAlexRandomWork: Work,
+    OpenAlexRandomAuthor: Author,
+    OpenAlexRandomSource: Source,
+    OpenAlexRandomConcept: Concept,
+    OpenAlexRandomInstitution: Institution,
+    OpenAlexRandomPublisher: Publisher,
+    OpenAlexRandomFunder: Funder
 }
 
 interface Work {
-    object: OpenAlexObject,
+    # own properties
+    object_cited_by_count: Int,
+    object_counts_by_year: [YearCount],
+    object_created_date: String,
+    object_display_name: String,
+    object_id: String,
+    object_ids_doi: String,
+    object_ids_mag: String,
+    object_ids_openalex: String,
+    object_ids_pmid: String,
+    object_ids_pmcid: String,
+    object_updated_date: String,
     abstract_text: String,
-    authorships: [Authorship],
     apc_payment: Payment,
-    best_oa_location: Location,
     biblio: Biblio,
-    cited_by_api_url: String,
-    concepts: [DehydratedConcept],
-    corresponding_author_ids: [String],
-    corresponding_institution_ids: [String],
     doi: String,
-    grants: [Grant],
     is_paratext: Boolean,
     is_retracted: Boolean,
     language: String,
-    locations: [Location],
     mesh: [Mesh],
     ngrams_url: String,
     open_access: OpenAccess,
-    primary_location: Location,
     publication_date: String,
     publication_year: Int,
-    referenced_works: [String],
-    related_works: [String],
     title: String,
     ttype: String,
     is_oa: Boolean,
     license: String,
     url: String,
     version: String,
+
+    # edges
+    authorships: [Author]
+    best_oa_location: Source
+    cited_by_api_url: [Work]
+    concepts: [Concept]
+    corresponding_author_ids: [Author]
+    corresponding_institution_ids: [Institution]
+    grants: [Funder]
+    locations: [Source]
+    primary_location: Source
+    referenced_works: [Work]
+    related_works: [Work]
+
 }
 
 type Authorship {
@@ -137,13 +147,26 @@ type OpenAccess {
 # OpenAlexAuthor types
 
 type Author {
-    object: OpenAlexObject,
+    # own properties
+    object_cited_by_count: Int,
+    object_counts_by_year: [YearCount],
+    object_created_date: String,
+    object_display_name: String,
+    object_id: String,
+    object_ids_doi: String,
+    object_ids_mag: String,
+    object_ids_openalex: String,
+    object_ids_pmid: String,
+    object_ids_pmcid: String,
+    object_updated_date: String,
     display_name_alternatives: [String],
-    last_known_institution: DehydratedInstitution,
     orcid: String,
     summary_stats: SummaryStats,
-    works_api_url: String,
     works_count: Int,
+
+    # edges
+    last_known_institution: Institution
+    works_api_url: [Work]
 }
 
 type SummaryStats {
@@ -161,17 +184,30 @@ type DehydratedAuthor {
 # Concept types
 
 type Concept {
-    ancestors: [DehydratedConcept],
-    object: OpenAlexObject,
+    # own properties
+    object_cited_by_count: Int,
+    object_counts_by_year: [YearCount],
+    object_created_date: String,
+    object_display_name: String,
+    object_id: String,
+    object_ids_doi: String,
+    object_ids_mag: String,
+    object_ids_openalex: String,
+    object_ids_pmid: String,
+    object_ids_pmcid: String,
+    object_updated_date: String,
     description: String,
     image_thumbnail_url: String,
     image_url: String,
     level: Int,
-    related_concepts: [DehydratedConcept],
     summary_stats: SummaryStats,
     wikidata: String,
-    works_api_url: String,
     works_count: Int,
+
+    # edges
+    ancestors: [Concept]
+    related_concepts: [Concept]
+    works_api_url: [Work]
 }
 
 type DehydratedConcept {
@@ -185,15 +221,24 @@ type DehydratedConcept {
 # Source types
 
 type Source {
-    object: OpenAlexObject,
+    # own properties
+    object_cited_by_count: Int,
+    object_counts_by_year: [YearCount],
+    object_created_date: String,
+    object_display_name: String,
+    object_id: String,
+    object_ids_doi: String,
+    object_ids_mag: String,
+    object_ids_openalex: String,
+    object_ids_pmid: String,
+    object_ids_pmcid: String,
+    object_updated_date: String,
     abreviated_title: String,
     alternative_titles: [String],
     apc_payment: [Price],
     apc_usd: Int,
     country_code: String,
     homepage_url: String,
-    host_organization: String,
-    host_organization_lineage: [String],
     host_organization_name: String,
     is_in_doaj: Boolean,
     is_oa: Boolean,
@@ -202,8 +247,12 @@ type Source {
     societies: [Society],
     summary_stats: SummaryStats,
     ttype: String,
-    works_api_url: String,
     works_count: Int,
+
+    # edges
+    host_organization: Institution # or Publisher?
+    host_organization_lineage: [Publisher]
+    works_api_url: [Work]
 }
 
 type Price {
@@ -228,19 +277,32 @@ type DehydratedSource {
 # Institution types
 
 type Institution {
-    object: OpenAlexObject,
-    associated_institutions: [DehydratedInstitution],
+    # own properties
+    object_cited_by_count: Int,
+    object_counts_by_year: [YearCount],
+    object_created_date: String,
+    object_display_name: String,
+    object_id: String,
+    object_ids_doi: String,
+    object_ids_mag: String,
+    object_ids_openalex: String,
+    object_ids_pmid: String,
+    object_ids_pmcid: String,
+    object_updated_date: String,
     display_name_alternatives: [String],
     country_code: String,
     geo: Geo,
     homepage_url: String,
-    repositories: [DehydratedSource],
     roles: [Role],
     ror: String,
     summary_stats: SummaryStats,
     ttype: String,
-    works_api_url: String,
     works_count: Int,
+
+    # edges
+    associated_institutions: [Institution]
+    repositories: [Source]
+    works_api_url: [Work]
 }
 
 type DehydratedInstitution {
@@ -270,24 +332,47 @@ type Geo {
 # Publisher types
 
 type Publisher {
-    object: OpenAlexObject,
+    # own properties
+    object_cited_by_count: Int,
+    object_counts_by_year: [YearCount],
+    object_created_date: String,
+    object_display_name: String,
+    object_id: String,
+    object_ids_doi: String,
+    object_ids_mag: String,
+    object_ids_openalex: String,
+    object_ids_pmid: String,
+    object_ids_pmcid: String,
+    object_updated_date: String,
     alternative_titles: [String],
     country_codes: [String],
     hierarchy_level: Int,
     image_thumbnail_url: String,
     image_url: String,
-    lineage: [String],
-    parent_publisher: String,
     roles: [Role],
-    sources_api_url: String,
     summary_stats: SummaryStats,
     works_count: Int,
+
+    # edges
+    parent_publisher: Publisher
+    lineage: [Publisher]
+    sources_api_url: [Source]
 }
 
 # Funder types
 
 type Funder {
-    object: OpenAlexObject,
+    object_cited_by_count: Int,
+    object_counts_by_year: [YearCount],
+    object_created_date: String,
+    object_display_name: String,
+    object_id: String,
+    object_ids_doi: String,
+    object_ids_mag: String,
+    object_ids_openalex: String,
+    object_ids_pmid: String,
+    object_ids_pmcid: String,
+    object_updated_date: String,
     alternative_titles: [String],
     country_code: String,
     description: String,

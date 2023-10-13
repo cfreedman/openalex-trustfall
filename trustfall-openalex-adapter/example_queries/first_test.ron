@@ -2,8 +2,8 @@ InputQuery (
     query: r#"
 {
     OpenAlexRandomWork {
-        object {
-            cited_by_count: cited_by_count @output
+        ... on object_counts_by_year {
+            cited_by_count @output
         }
     }
 }"#,

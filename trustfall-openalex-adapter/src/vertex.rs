@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::Deserialize;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -116,6 +118,16 @@ pub struct IDObject {
     pub openalex: Option<String>,
     pub pmid: Option<String>,
     pub pmcid: Option<String>,
+    pub scopus: Option<String>,
+    pub twitter: Option<String>,
+    pub wikipedia: Option<String>,
+    pub fatcat: Option<String>,
+    pub wikidata: Option<String>,
+    pub grid: Option<String>,
+    pub umls_cui: Option<Vec<String>>,
+    pub umls_aui: Option<Vec<String>>,
+    pub ror: Option<String>,
+    pub crossref: Option<String>,
 }
 // OpenAlexWork structs
 #[derive(Clone, Debug, Deserialize)]
@@ -123,7 +135,7 @@ pub struct Work {
     #[serde(flatten)]
     pub object: OpenAlexObject,
 
-    pub abstract_inverted_index: Option<String>,
+    pub abstract_inverted_index: Option<HashMap<String, Vec<u32>>>,
     pub authorships: Vec<Authorship>,
     pub apc_list: Option<Payment>,
     pub apc_paid: Option<Payment>,
@@ -131,24 +143,24 @@ pub struct Work {
     pub biblio: Option<Biblio>,
     pub cited_by_api_url: String,
     pub concepts: Vec<DehydratedConcept>,
-    pub corresponding_author_ids: Vec<String>,
-    pub corresponding_institution_ids: Vec<String>,
+    pub corresponding_author_ids: Option<Vec<String>>,
+    pub corresponding_institution_ids: Option<Vec<String>>,
     pub doi: Option<String>,
     pub grants: Vec<Grant>,
-    pub institutions_distinct_count: Option<u16>,
+    pub institutions_distinct_count: Option<u32>,
     pub is_oa: Option<bool>,
     pub is_paratext: Option<bool>,
     pub is_retracted: Option<bool>,
     pub language: Option<String>,
     pub license: Option<String>,
     pub locations: Vec<Location>,
-    pub locations_count: Option<u16>,
+    pub locations_count: Option<u32>,
     pub mesh: Vec<Mesh>,
     pub ngrams_url: Option<String>,
     pub open_access: Option<OpenAccess>,
     pub primary_location: Option<Location>,
     pub publication_date: Option<String>,
-    pub publication_year: Option<u16>,
+    pub publication_year: Option<u32>,
     pub referenced_works: Vec<String>,
     pub related_works: Vec<String>,
     pub sustainable_development_goals: Vec<SustainableObject>,
@@ -165,7 +177,7 @@ pub struct Authorship {
     pub author_position: Option<String>,
     pub author: DehydratedAuthor,
     pub institutions: Vec<DehydratedInstitution>,
-    pub countries: Vec<String>,
+    pub countries: Option<Vec<String>>,
     pub is_corresponding: Option<bool>,
     pub raw_affiliation_string: Option<String>,
 }
@@ -188,7 +200,7 @@ pub struct Biblio {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct YearCount {
-    pub year: u16,
+    pub year: u32,
     pub works_count: Option<u32>,
     pub cited_by_count: u32,
 }
@@ -233,14 +245,16 @@ pub struct OpenAccess {
 pub struct SustainableObject {
     id: Option<String>,
     display_name: Option<String>,
-    score: Option<u16>,
+    score: Option<f64>,
 }
 
 // OpenAlexAuthor structs
 #[derive(Clone, Debug, Deserialize)]
 pub struct Author {
+    #[serde(flatten)]
     pub object: OpenAlexObject,
-    pub display_name_alternatives: Vec<String>,
+
+    pub display_name_alternatives: Option<Vec<String>>,
     pub last_known_institution: Option<DehydratedInstitution>,
     pub orcid: Option<String>,
     pub summary_stats: Option<SummaryStats>,
@@ -267,11 +281,13 @@ pub struct DehydratedAuthor {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Concept {
     pub ancestors: Vec<DehydratedConcept>,
+    #[serde(flatten)]
     pub object: OpenAlexObject,
+
     pub description: Option<String>,
     pub image_thumbnail_url: Option<String>,
     pub image_url: Option<String>,
-    pub level: Option<u16>,
+    pub level: Option<u32>,
     pub related_concepts: Vec<DehydratedConcept>,
     pub summary_stats: Option<SummaryStats>,
     pub wikidata: Option<String>,
@@ -284,27 +300,29 @@ pub struct DehydratedConcept {
     pub id: String,
     pub wikidata: Option<String>,
     pub display_name: String,
-    pub level: u16,
-    pub score: f64, // Fix
+    pub level: u32,
+    pub score: Option<f64>, // Fix
 }
 
 // Source structs
 #[derive(Clone, Debug, Deserialize)]
 pub struct Source {
+    #[serde(flatten)]
     pub object: OpenAlexObject,
+
     pub abreviated_title: Option<String>,
-    pub alternative_titles: Vec<String>,
-    pub apc_payment: Vec<Price>,
-    pub apc_usd: Option<u16>,
+    pub alternative_titles: Option<Vec<String>>,
+    pub apc_prices: Option<Vec<Price>>,
+    pub apc_usd: Option<u32>,
     pub country_code: Option<String>,
     pub homepage_url: Option<String>,
     pub host_organization: Option<String>,
     pub host_organization_lineage: Vec<String>,
     pub host_organization_name: Option<String>,
     pub is_in_doaj: Option<bool>,
-    pub is_oa: Option<bool>,
-    pub issn: Vec<String>,
     pub issn_l: Option<String>,
+    pub issn: Option<Vec<String>>,
+    pub is_oa: Option<bool>,
     pub societies: Vec<Society>,
     pub summary_stats: Option<SummaryStats>,
 
@@ -317,7 +335,7 @@ pub struct Source {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Price {
-    pub price: u16,
+    pub price: u32,
     pub currency: String,
 }
 
@@ -333,7 +351,7 @@ pub struct DehydratedSource {
     pub id: String,
     pub display_name: String,
     pub issn_l: Option<String>,
-    pub issn: Vec<String>,
+    pub issn: Option<Vec<String>>,
     pub host_organization: Option<String>,
 
     #[serde(rename(deserialize = "type"))]
@@ -343,13 +361,15 @@ pub struct DehydratedSource {
 // Institution structs
 #[derive(Clone, Debug, Deserialize)]
 pub struct Institution {
+    #[serde(flatten)]
     pub object: OpenAlexObject,
+
     pub associated_institutions: Vec<DehydratedInstitution>,
-    pub display_name_alternatives: Vec<String>,
-    pub display_name_acronyms: Vec<String>,
+    pub display_name_alternatives: Option<Vec<String>>,
+    pub display_name_acronyms: Option<Vec<String>>,
     pub country_code: Option<String>,
     pub geo: Option<Geo>,
-    pub homepage_url: String,
+    pub homepage_url: Option<String>,
     pub image_thumbnail_url: Option<String>,
     pub image_url: Option<String>,
     pub repositories: Vec<DehydratedSource>,
@@ -390,17 +410,19 @@ pub struct Geo {
     pub region: Option<String>,
     pub country_code: Option<String>,
     pub country: Option<String>,
-    pub latitude: Option<i32>,
-    pub longitude: Option<i32>,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
 }
 
 // Publisher structs
 #[derive(Clone, Debug, Deserialize)]
 pub struct Publisher {
+    #[serde(flatten)]
     pub object: OpenAlexObject,
-    pub alternative_titles: Vec<String>,
-    pub country_codes: Vec<String>,
-    pub hierarchy_level: Option<u16>,
+
+    pub alternative_titles: Option<Vec<String>>,
+    pub country_codes: Option<Vec<String>>,
+    pub hierarchy_level: Option<u32>,
     pub image_thumbnail_url: Option<String>,
     pub image_url: Option<String>,
     pub lineage: Vec<String>,
@@ -414,8 +436,10 @@ pub struct Publisher {
 // Funder structs
 #[derive(Clone, Debug, Deserialize)]
 pub struct Funder {
+    #[serde(flatten)]
     pub object: OpenAlexObject,
-    pub alternative_titles: Vec<String>,
+
+    pub alternative_titles: Option<Vec<String>>,
     pub country_code: Option<String>,
     pub description: Option<String>,
     pub grants_count: Option<u32>,

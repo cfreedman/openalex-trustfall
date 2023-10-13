@@ -16,17 +16,20 @@ use trustfall_core::{
 fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
     let work = vertex.as_work().expect("Vertex was not a work");
     match field_name {
-        "cited_by_count" => work.object.clone().cited_by_count.into(),
-        "created_date" => work.object.clone().created_date.into(),
-        "display_name" => work.object.clone().display_name.into(),
-        "id" => work.object.clone().id.into(),
-        "ids_doi" => work.object.clone().ids.doi.into(),
-        "ids_mag" => work.object.clone().ids.mag.into(),
-        "ids_openalex" => work.object.clone().ids.openalex.into(),
-        "ids_pmid" => work.object.clone().ids.pmid.into(),
-        "ids_pmcid" => work.object.clone().ids.pmcid.into(),
-        "updated_date" => work.object.clone().updated_date.into(),
-        "abstract_text" => work.abstract_inverted_index.clone().into(),
+        "object_cited_by_count" => work.object.clone().cited_by_count.into(),
+        "object_created_date" => work.object.clone().created_date.into(),
+        "object_display_name" => work.object.clone().display_name.into(),
+        "object_id" => work.object.clone().id.into(),
+        "object_ids_doi" => work.object.clone().ids.doi.into(),
+        "object_ids_mag" => work.object.clone().ids.mag.into(),
+        "object_ids_openalex" => work.object.clone().ids.openalex.into(),
+        "object_ids_pmid" => work.object.clone().ids.pmid.into(),
+        "object_ids_pmcid" => work.object.clone().ids.pmcid.into(),
+        "object_updated_date" => work.object.clone().updated_date.into(),
+        "abstract_text" => match work.abstract_inverted_index.clone() {
+            Some(hashmap) => hashmap.keys().last().into(),
+            _ => FieldValue::Null,
+        },
         "apc_list_value" => work
             .apc_list
             .clone()
@@ -143,16 +146,16 @@ fn get_work_property(vertex: &Vertex, field_name: &str) -> FieldValue {
 fn get_author_property(vertex: &Vertex, field_name: &str) -> FieldValue {
     let author = vertex.as_author().expect("Vertex was not an author");
     match field_name {
-        "cited_by_count" => author.object.clone().cited_by_count.into(),
-        "created_date" => author.object.clone().created_date.into(),
-        "display_name" => author.object.clone().display_name.into(),
-        "id" => author.object.clone().id.into(),
-        "ids_doi" => author.object.clone().ids.doi.into(),
-        "ids_mag" => author.object.clone().ids.mag.into(),
-        "ids_openalex" => author.object.clone().ids.openalex.into(),
-        "ids_pmid" => author.object.clone().ids.pmid.into(),
-        "ids_pmcid" => author.object.clone().ids.pmcid.into(),
-        "updated_date" => author.object.clone().updated_date.into(),
+        "object_cited_by_count" => author.object.clone().cited_by_count.into(),
+        "object_created_date" => author.object.clone().created_date.into(),
+        "object_display_name" => author.object.clone().display_name.into(),
+        "object_id" => author.object.clone().id.into(),
+        "object_ids_doi" => author.object.clone().ids.doi.into(),
+        "object_ids_mag" => author.object.clone().ids.mag.into(),
+        "object_ids_openalex" => author.object.clone().ids.openalex.into(),
+        "object_ids_pmid" => author.object.clone().ids.pmid.into(),
+        "object_ids_pmcid" => author.object.clone().ids.pmcid.into(),
+        "object_updated_date" => author.object.clone().updated_date.into(),
         "display_name_alternatives" => author.display_name_alternatives.clone().into(),
         "orcid" => author.orcid.clone().into(),
         "summary_stats_mean_citeness" => match author
@@ -181,25 +184,26 @@ fn get_author_property(vertex: &Vertex, field_name: &str) -> FieldValue {
 fn get_source_property(vertex: &Vertex, field_name: &str) -> FieldValue {
     let source = vertex.as_source().expect("Vertex was not a source");
     match field_name {
-        "cited_by_count" => source.object.clone().cited_by_count.into(),
-        "created_date" => source.object.clone().created_date.into(),
-        "display_name" => source.object.clone().display_name.into(),
-        "id" => source.object.clone().id.into(),
-        "ids_doi" => source.object.clone().ids.doi.unwrap().into(),
-        "ids_mag" => source.object.clone().ids.mag.unwrap().into(),
-        "ids_openalex" => source.object.clone().ids.openalex.unwrap().into(),
-        "ids_pmid" => source.object.clone().ids.pmid.unwrap().into(),
-        "ids_pmcid" => source.object.clone().ids.pmcid.unwrap().into(),
-        "updated_date" => source.object.clone().updated_date.into(),
+        "object_cited_by_count" => source.object.clone().cited_by_count.into(),
+        "object_created_date" => source.object.clone().created_date.into(),
+        "object_display_name" => source.object.clone().display_name.into(),
+        "object_id" => source.object.clone().id.into(),
+        "object_ids_doi" => source.object.clone().ids.doi.into(),
+        "object_ids_mag" => source.object.clone().ids.mag.into(),
+        "object_ids_openalex" => source.object.clone().ids.openalex.into(),
+        "object_ids_pmid" => source.object.clone().ids.pmid.into(),
+        "object_ids_pmcid" => source.object.clone().ids.pmcid.into(),
+        "object_updated_date" => source.object.clone().updated_date.into(),
         "abreviated_title" => source.abreviated_title.clone().into(),
         "alternative_titles" => source.alternative_titles.clone().into(),
-        "apc_payment" => source
-            .apc_payment
-            .clone()
-            .into_iter()
-            .map(|price_obj| price_obj.price.to_string() + " - " + &price_obj.currency)
-            .collect::<Vec<String>>()
-            .into(),
+        "apc_prices" => match (source.apc_prices.clone()) {
+            Some(price_vec) => price_vec
+                .into_iter()
+                .map(|price_obj| price_obj.price.to_string() + " - " + &price_obj.currency)
+                .collect::<Vec<String>>()
+                .into(),
+            _ => FieldValue::Null,
+        },
         "apc_usd" => source.apc_usd.into(),
         "country_code" => source.country_code.clone().into(),
         "homepage_url" => source.homepage_url.clone().into(),
@@ -243,16 +247,16 @@ fn get_source_property(vertex: &Vertex, field_name: &str) -> FieldValue {
 fn get_concept_property(vertex: &Vertex, field_name: &str) -> FieldValue {
     let concept = vertex.as_concept().expect("Vertex was not a concept");
     match field_name {
-        "cited_by_count" => concept.object.clone().cited_by_count.into(),
-        "created_date" => concept.object.clone().created_date.into(),
-        "display_name" => concept.object.clone().display_name.into(),
-        "id" => concept.object.clone().id.into(),
-        "ids_doi" => concept.object.clone().ids.doi.unwrap().into(),
-        "ids_mag" => concept.object.clone().ids.mag.unwrap().into(),
-        "ids_openalex" => concept.object.clone().ids.openalex.unwrap().into(),
-        "ids_pmid" => concept.object.clone().ids.pmid.unwrap().into(),
-        "ids_pmcid" => concept.object.clone().ids.pmcid.unwrap().into(),
-        "updated_date" => concept.object.clone().updated_date.into(),
+        "object_cited_by_count" => concept.object.clone().cited_by_count.into(),
+        "object_created_date" => concept.object.clone().created_date.into(),
+        "object_display_name" => concept.object.clone().display_name.into(),
+        "object_id" => concept.object.clone().id.into(),
+        "object_ids_doi" => concept.object.clone().ids.doi.into(),
+        "object_ids_mag" => concept.object.clone().ids.mag.into(),
+        "object_ids_openalex" => concept.object.clone().ids.openalex.into(),
+        "object_ids_pmid" => concept.object.clone().ids.pmid.into(),
+        "object_ids_pmcid" => concept.object.clone().ids.pmcid.into(),
+        "object_updated_date" => concept.object.clone().updated_date.into(),
         "description" => concept.description.clone().into(),
         "image_thumbnail_url" => concept.image_thumbnail_url.clone().into(),
         "image_url" => concept.image_url.clone().into(),
@@ -286,16 +290,16 @@ fn get_institution_property(vertex: &Vertex, field_name: &str) -> FieldValue {
         .as_institution()
         .expect("Vertex was not an institution");
     match field_name {
-        "cited_by_count" => institution.object.clone().cited_by_count.into(),
-        "created_date" => institution.object.clone().created_date.into(),
-        "display_name" => institution.object.clone().display_name.into(),
-        "id" => institution.object.clone().id.into(),
-        "ids_doi" => institution.object.clone().ids.doi.into(),
-        "ids_mag" => institution.object.clone().ids.mag.into(),
-        "ids_openalex" => institution.object.clone().ids.openalex.into(),
-        "ids_pmid" => institution.object.clone().ids.pmid.into(),
-        "ids_pmcid" => institution.object.clone().ids.pmcid.into(),
-        "updated_date" => institution.object.clone().updated_date.into(),
+        "object_cited_by_count" => institution.object.clone().cited_by_count.into(),
+        "object_created_date" => institution.object.clone().created_date.into(),
+        "object_display_name" => institution.object.clone().display_name.into(),
+        "object_id" => institution.object.clone().id.into(),
+        "object_ids_doi" => institution.object.clone().ids.doi.into(),
+        "object_ids_mag" => institution.object.clone().ids.mag.into(),
+        "object_ids_openalex" => institution.object.clone().ids.openalex.into(),
+        "object_ids_pmid" => institution.object.clone().ids.pmid.into(),
+        "object_ids_pmcid" => institution.object.clone().ids.pmcid.into(),
+        "object_updated_date" => institution.object.clone().updated_date.into(),
         "country_codes" => institution.country_code.clone().into(),
         "display_name_alternatives" => institution.display_name_alternatives.clone().into(),
         "geo_city" => institution.geo.clone().and_then(|geo| geo.city).into(),
@@ -311,8 +315,14 @@ fn get_institution_property(vertex: &Vertex, field_name: &str) -> FieldValue {
             .and_then(|geo| geo.country_code)
             .into(),
         "geo_country" => institution.geo.clone().and_then(|geo| geo.country).into(),
-        "geo_latitude" => institution.geo.clone().and_then(|geo| geo.latitude).into(),
-        "geo_longitude" => institution.geo.clone().and_then(|geo| geo.longitude).into(),
+        "geo_latitude" => match institution.geo.clone().and_then(|geo| geo.latitude) {
+            Some(num) => FieldValue::Float64(num),
+            _ => FieldValue::Null,
+        },
+        "geo_longitude" => match institution.geo.clone().and_then(|geo| geo.longitude) {
+            Some(num) => FieldValue::Float64(num),
+            _ => FieldValue::Null,
+        },
         "homepage_url" => institution.homepage_url.clone().into(),
         "ror" => institution.ror.clone().into(),
         "ttype" => institution.ttype.clone().into(),
@@ -342,16 +352,16 @@ fn get_institution_property(vertex: &Vertex, field_name: &str) -> FieldValue {
 fn get_publisher_property(vertex: &Vertex, field_name: &str) -> FieldValue {
     let publisher = vertex.as_publisher().expect("Vertex was not a publisher");
     match field_name {
-        "cited_by_count" => publisher.object.clone().cited_by_count.into(),
-        "created_date" => publisher.object.clone().created_date.into(),
-        "display_name" => publisher.object.clone().display_name.into(),
-        "id" => publisher.object.clone().id.into(),
-        "ids_doi" => publisher.object.clone().ids.doi.unwrap().into(),
-        "ids_mag" => publisher.object.clone().ids.mag.unwrap().into(),
-        "ids_openalex" => publisher.object.clone().ids.openalex.unwrap().into(),
-        "ids_pmid" => publisher.object.clone().ids.pmid.unwrap().into(),
-        "ids_pmcid" => publisher.object.clone().ids.pmcid.unwrap().into(),
-        "updated_date" => publisher.object.clone().updated_date.into(),
+        "object_cited_by_count" => publisher.object.clone().cited_by_count.into(),
+        "object_created_date" => publisher.object.clone().created_date.into(),
+        "object_display_name" => publisher.object.clone().display_name.into(),
+        "object_id" => publisher.object.clone().id.into(),
+        "object_ids_doi" => publisher.object.clone().ids.doi.into(),
+        "object_ids_mag" => publisher.object.clone().ids.mag.into(),
+        "object_ids_openalex" => publisher.object.clone().ids.openalex.into(),
+        "object_ids_pmid" => publisher.object.clone().ids.pmid.into(),
+        "object_ids_pmcid" => publisher.object.clone().ids.pmcid.into(),
+        "object_updated_date" => publisher.object.clone().updated_date.into(),
         "alternative_titles" => publisher.alternative_titles.clone().into(),
         "country_codes" => publisher.country_codes.clone().into(),
         "hierarchy_level" => publisher.hierarchy_level.into(),
@@ -383,16 +393,16 @@ fn get_publisher_property(vertex: &Vertex, field_name: &str) -> FieldValue {
 fn get_funder_property(vertex: &Vertex, field_name: &str) -> FieldValue {
     let funder = vertex.as_funder().expect("Vertex was not a funder");
     match field_name {
-        "cited_by_count" => funder.object.clone().cited_by_count.into(),
-        "created_date" => funder.object.clone().created_date.into(),
-        "display_name" => funder.object.clone().display_name.into(),
-        "id" => funder.object.clone().id.into(),
-        "ids_doi" => funder.object.clone().ids.doi.unwrap().into(),
-        "ids_mag" => funder.object.clone().ids.mag.unwrap().into(),
-        "ids_openalex" => funder.object.clone().ids.openalex.unwrap().into(),
-        "ids_pmid" => funder.object.clone().ids.pmid.unwrap().into(),
-        "ids_pmcid" => funder.object.clone().ids.pmcid.unwrap().into(),
-        "updated_date" => funder.object.clone().updated_date.into(),
+        "object_cited_by_count" => funder.object.clone().cited_by_count.into(),
+        "object_created_date" => funder.object.clone().created_date.into(),
+        "object_display_name" => funder.object.clone().display_name.into(),
+        "object_id" => funder.object.clone().id.into(),
+        "object_ids_doi" => funder.object.clone().ids.doi.into(),
+        "object_ids_mag" => funder.object.clone().ids.mag.into(),
+        "object_ids_openalex" => funder.object.clone().ids.openalex.into(),
+        "object_ids_pmid" => funder.object.clone().ids.pmid.into(),
+        "object_ids_pmcid" => funder.object.clone().ids.pmcid.into(),
+        "object_updated_date" => funder.object.clone().updated_date.into(),
         "alternative_titles" => funder.alternative_titles.clone().into(),
         "country_code" => funder.country_code.clone().into(),
         "description" => funder.description.clone().into(),
@@ -518,6 +528,12 @@ impl Adapter<'static> for OpenAlexAdapter {
                 "Work".to_string(),
             ),
             "OpenAlexRandomWork" => self.random("Work".to_string()),
+            "OpenAlexRandomAuthor" => self.random("Author".to_string()),
+            "OpenAlexRandomSource" => self.random("Source".to_string()),
+            "OpenAlexRandomConcept" => self.random("Concept".to_string()),
+            "OpenAlexRandomInstitution" => self.random("Institution".to_string()),
+            "OpenAlexRandomPublisher" => self.random("Publisher".to_string()),
+            "OpenAlexRandomFunder" => self.random("Funder".to_string()),
             _ => unreachable!("todo"),
         }
     }
